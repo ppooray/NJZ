@@ -220,11 +220,14 @@
             <div class="options" id="options-container"></div>
         </div>
 
-        <!-- 🎬 新增：等待動畫區塊 -->
+        <!-- 🎬 等待動畫區塊 -->
         <div id="wait-view">
-            <!-- 將 waiting.mp4 替換成你的過場動畫 -->
-            <video id="wait-video" src="waiting.mp4" playsinline muted style="width: 100%; border: 1px solid #444; border-radius: 5px;"></video>
+            <!-- 移除 muted，讓影片可以正常發出聲音 -->
+            <video id="wait-video" src="waiting.mp4" playsinline preload="auto" style="width: 100%; border: 1px solid #444; border-radius: 5px;"></video>
             <div style="font-family: 'VT323'; color: #aaa; margin-top:15px; letter-spacing: 4px; animation: blink 1s infinite;">PROCESSING_DATA...</div>
+            
+            <!-- 新增的跳過等待按鈕 -->
+            <button id="btn-skip-wait" class="btn-action" style="margin-top: 20px; font-size: 1.2rem; padding: 10px;">▶▶ FAST FORWARD (跳過分析)</button>
         </div>
 
         <div id="result-view">
@@ -496,6 +499,33 @@
             });
         }
     }
+
+    // 4. 播放送出答案的等待動畫
+    function showWaitAnimation() {
+        quizView.style.display = 'none';
+        waitView.style.display = 'block';
+        if (currentBgm) currentBgm.pause(); // 暫停測驗音樂
+        
+        waitVideo.currentTime = 0; // 確保影片從頭播
+        waitVideo.play().catch(e => {
+            // 如果影片發生意外播不出來，3秒後自動進入故障畫面
+            setTimeout(showFinalGlitch, 3000); 
+        });
+
+        // 4A. 動畫自然播完後 -> 進入故障畫面
+        waitVideo.onended = () => {
+            waitView.style.display = 'none';
+            showFinalGlitch();
+        };
+    }
+
+    // 4B. 點擊「快轉跳過」按鈕時 -> 暫停等待影片，直接進入故障畫面
+    document.getElementById('btn-skip-wait').addEventListener('click', () => {
+        playClickSound(); // 喀噠聲
+        waitVideo.pause(); // 停止影片，以免聲音繼續播
+        waitView.style.display = 'none';
+        showFinalGlitch(); // 呼叫兔子出閘！
+    });
 </script>
 
 </body>
