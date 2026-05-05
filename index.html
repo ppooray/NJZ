@@ -274,7 +274,7 @@
         <div id="result-view">
             <div id="result-box">
                 <h2 id="result-title"></h2>
-                <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong> / 30</p>
+                <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong> </p>
                 <p id="result-desc" style="font-weight: 300; margin-top: 20px; line-height: 1.8; color: #ddd; text-align: left;"></p>
             </div>
             
@@ -311,6 +311,7 @@
 
     function playClickSound() {
         const clickAudio = document.getElementById('click-sound');
+        clickAudio.volume = 1;
         clickAudio.currentTime = 0;
         clickAudio.play().catch(e => {});
     }
@@ -506,7 +507,7 @@
                     result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9", bgmId: "bgm-res-nostalgic", bgmVolume: 0.5 };
                 } else {
                     // 得分率 60% 以上
-                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d", bgmId: "bgm-res-lost", bgmVolume: 0.3 };
+                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d", bgmId: "bgm-res-lost", bgmVolume: 0.5 };
                 }
 
                 const title = document.getElementById('result-title');
