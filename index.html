@@ -161,39 +161,46 @@
         }
         #music-control:hover { border-color: #FFF; }
 
-        /* 📱 針對手機與小螢幕的極致優化 (RWD) */
+/* 📱 針對手機與小螢幕的極致優化 (RWD) */
         @media (max-width: 600px) {
-            /* 縮小邊距，把空間留給內容 */
+            
+            /* 🌟 新增：減輕手機版掃描線的厚重感與暗度 */
+            body::after {
+                /* 把黑色的透明度從 0.25 降到 0.1，並減弱紅綠藍雜訊 */
+                background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+                /* 把線條調細一點 */
+                background-size: 100% 3px, 3px 100%; 
+            }
+
+            /* 🌟 新增：提亮手機版影片，抵銷 OLED 螢幕的暗沉 */
+            video {
+                filter: contrast(1.05) brightness(1.1); /* 把亮度從 0.9 拉高到 1.1 */
+            }
+
+            /* 🌟 新增：視窗背景稍微調亮一點，減少壓迫感 */
+            .window {
+                background: rgba(30, 30, 30, 0.85); 
+            }
+
+            /* --- 以下保留你原本就有的手機版設定 --- */
             body { padding: 10px; }
             .window-content { padding: 25px 15px; }
-            
-            /* 縮小攝影機 UI，避免擋到測驗視窗 */
             .camcorder-ui { font-size: 1.1rem; }
             .rec { top: 15px; left: 15px; }
             .battery { top: 15px; right: 15px; }
             .date { bottom: 15px; right: 15px; }
-
-            /* 縮小開場與標題文字 */
             .vcr-text { font-size: 1.8rem; }
             .click-hint { font-size: 1.2rem; margin-top: 20px; }
             h1.title { font-size: 2.2rem; letter-spacing: 2px; }
             .subtitle { font-size: 0.8rem; margin-bottom: 15px; }
             .marquee-container { font-size: 1rem; }
-
-            /* 優化測驗題目與按鈕大小 */
             .question-text { font-size: 1.1rem; margin-bottom: 20px; }
             .option-btn { font-size: 0.95rem; padding: 10px 15px; }
             .btn-action { font-size: 1.2rem; padding: 12px; letter-spacing: 2px; }
-            
-            /* 結果畫面的字體大小調整 */
             #result-title { font-size: 1.8rem; }
             #result-desc { font-size: 1rem; }
             .btn-share { font-size: 1rem; padding: 8px; }
-
-            /* 縮小故障文字，確保手機上不會斷行太醜 */
             .transition-status { font-size: 2rem; }
-
-            /* 把音樂按鈕縮小並靠邊 */
             #music-control { bottom: 15px; left: 15px; font-size: 1rem; padding: 4px 8px; }
         }
     </style>
