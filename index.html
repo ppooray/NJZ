@@ -179,9 +179,14 @@
             <button id="btn-start" class="btn-action">▶ INSERT TAPE (開始測驗)</button>
         </div>
 
+        <!-- 狀態 2：影片播放區塊 -->
         <div id="video-view">
+            <!-- 🎬 將 src 替換為你的影片檔名 -->
             <video id="intro-video" src="open.mp4" playsinline></video>
             <div style="font-family: 'VT323'; color: #666; margin-top:10px; letter-spacing: 2px;">PLAYING...</div>
+            
+            <!-- 新增的跳過按鈕 -->
+            <button id="btn-skip-video" class="btn-action" style="margin-top: 20px; font-size: 1.2rem; padding: 10px;">▶▶ FAST FORWARD (跳過影片)</button>
         </div>
 
         <div id="quiz-view">
@@ -257,9 +262,11 @@
         bgm.play().catch(e => console.log("BGM Blocked"));
     });
 
-    // 3. 影片播完 -> 白光過場 -> 顯示第一題
-    introVideo.addEventListener('ended', () => {
-        flashOverlay.classList.add('flash-anim'); // 畫面閃爍
+// === 更新後的切換測驗邏輯 ===
+
+    // 我們把「進入測驗」的特效獨立寫成一個功能，這樣播完或跳過都可以共用
+    function enterQuiz() {
+        flashOverlay.classList.add('flash-anim'); // 畫面閃爍白光
         
         setTimeout(() => {
             videoView.style.display = 'none';
@@ -268,6 +275,15 @@
         }, 200); // 趁白光最亮時切換畫面
         
         setTimeout(() => flashOverlay.classList.remove('flash-anim'), 600);
+    }
+
+    // 3A. 影片自然播完時 -> 進入測驗
+    introVideo.addEventListener('ended', enterQuiz);
+
+    // 3B. 點擊「快轉跳過」按鈕時 -> 暫停影片，直接進入測驗
+    document.getElementById('btn-skip-video').addEventListener('click', () => {
+        introVideo.pause(); // 暫停影片，以免背景繼續出聲音
+        enterQuiz(); // 直接觸發過場動畫
     });
 
     // 渲染題目函數
