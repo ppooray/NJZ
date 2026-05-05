@@ -3,441 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJDI 鯨鬱症量表 - Attention!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Pacifico&family=Press+Start+2P&family=VT323&family=Noto+Sans+TC:wght@400;700&family=Helvetica&display=swap" rel="stylesheet">
+    <title>NJDI - Archive 1998</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-blue: #3CB4F6;
-            --nj-lime: #A3FF22;
-            --nj-white: #FFFFFF;
-            --box-border: 4px solid #000;
+            --bg-dark: #121212;
+            --vhs-blue: #2c3e50;
+            --vhs-gray: #7f8c8d;
+            --vhs-red: #c0392b;
+            --text-glow: #e0e0e0;
+            --window-bg: rgba(20, 20, 20, 0.85);
         }
 
         body {
-            background-color: var(--bg-blue);
-            font-family: 'Noto Sans TC', 'Helvetica', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
+            background-color: var(--bg-dark); color: var(--text-glow);
+            font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden;
+            background: radial-gradient(circle, #2b2b2b 0%, #000000 100%);
         }
 
-        /* 🌟 進場動畫讀取畫面 🌟 */
+        /* 📺 掃描線特效 */
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 999;
+        }
+
+        /* 🌟 開場與過場畫面 */
         #intro-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-blue);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 1.5s ease;
+        }
+        #intro-screen.hidden { opacity: 0; pointer-events: none; }
+
+        .vcr-text { font-family: 'VT323', monospace; color: #FFF; font-size: 2.5rem; letter-spacing: 5px; text-shadow: 2px 2px 4px rgba(255,255,255,0.3); }
+        .play-icon { font-size: 3rem; margin-bottom: 20px; animation: flicker 0.5s infinite alternate; }
+        @keyframes flicker { 0% { opacity: 0.8; } 100% { opacity: 0.2; } }
+
+        /* 攝影機 UI 元素 */
+        .camcorder-ui { position: fixed; font-family: 'VT323', monospace; color: #FFF; font-size: 1.5rem; z-index: 998; pointer-events: none; text-shadow: 1px 1px 2px #000; }
+        .rec { top: 30px; left: 30px; display: flex; align-items: center; gap: 10px; }
+        .rec-dot { width: 15px; height: 15px; background-color: var(--vhs-red); border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 10px var(--vhs-red); }
+        .battery { top: 30px; right: 30px; border: 2px solid #FFF; padding: 2px 8px; }
+        .date { bottom: 30px; right: 30px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* 白光過場 */
+        #flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #FFF; z-index: 9995; opacity: 0; pointer-events: none;
+        }
+        .flash-anim { animation: flashWhite 0.6s ease-out forwards; }
+        @keyframes flashWhite { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* 📺 故障轉場畫面 (結尾用) */
+        #transition-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; z-index: 9990; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        .static-noise-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            filter: url(#noiseFilter); opacity: 0.4; animation: tvStatic 0.1s infinite alternate;
+        }
+        @keyframes tvStatic { 0% { transform: scale(1.1) translate(1px, 1px); } 100% { transform: scale(1.1) translate(-1px, -1px); } }
+        .transition-status {
+            font-family: 'VT323', monospace; color: #FFF; font-size: 3rem;
+            position: absolute; top: 100px; left: 50px; z-index: 10;
+            animation: flicker 0.2s infinite; text-shadow: 2px 2px 0px blue, -2px -2px 0px red;
+        }
+        #bunny-glitch {
+            display: none; width: 280px; position: relative; z-index: 10;
+            filter: drop-shadow(5px 0px 0px rgba(255,0,0,0.8)) drop-shadow(-5px 0px 0px rgba(0,255,255,0.8));
+            animation: glitch-skew 0.2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg) translate(0, 0); }
+            20% { transform: skew(-10deg) translate(-5px, 5px); filter: hue-rotate(90deg); }
+            40% { transform: skew(10deg) translate(5px, -5px); }
+            60% { transform: translate(10px, -10px) scale(1.1); }
+            80% { transform: translate(-10px, 10px); }
+            100% { transform: skew(0deg) translate(0, 0); }
         }
 
-        #intro-screen.hidden {
-            transform: translateY(-100vh); /* 向上滑出螢幕 */
-            pointer-events: none;
+        /* 視窗主體 */
+        .window {
+            background: var(--window-bg); width: 100%; max-width: 600px;
+            border: 1px solid #333; border-radius: 8px; backdrop-filter: blur(5px);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8); position: relative;
+            z-index: 10; opacity: 0; transform: translateY(20px); transition: all 1.5s ease;
+            min-height: 400px; display: flex; flex-direction: column; justify-content: center;
         }
+        .window.show { opacity: 1; transform: translateY(0); }
+        .window-content { padding: 40px 30px; width: 100%; box-sizing: border-box;}
 
-        .loading-text {
-            font-family: 'Press Start 2P', cursive;
-            color: var(--nj-lime);
-            text-shadow: 3px 3px 0px #000;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            animation: blink 1s infinite;
-        }
-
-        .progress-box {
-            width: 300px;
-            height: 30px;
-            border: 4px solid #000;
-            background: #FFF;
-            padding: 4px;
-            box-shadow: 5px 5px 0px #000;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--nj-lime);
-            width: 0%;
-            animation: fillBar 2s steps(10) forwards;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        @keyframes fillBar {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-
-        /* 音樂控制按鈕 */
-        #music-control {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--nj-white);
-            border: var(--box-border);
-            padding: 10px 15px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.8rem;
-            cursor: pointer;
-            z-index: 100;
-            border-radius: 50px;
-            box-shadow: 4px 4px 0px #000;
-            transition: 0.2s;
-            opacity: 0; /* 初始隱藏，等動畫播完再出現 */
-            transform: translateY(-20px);
-        }
-
-        #music-control.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        #music-control:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #000;
-        }
-
-        /* 飛天小女警動畫區塊 */
-        .flyer-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0; /* 初始隱藏 */
-            transition: opacity 1s ease-in-out;
-        }
-
-        .flyer-container.show {
-            opacity: 1;
-        }
-
-        .flyer {
-            position: absolute;
-            width: 80px;
-            opacity: 0.8;
-            animation: floatAround linear infinite;
-        }
-
-        .flyer:nth-child(1) { top: 10%; left: -10%; animation-duration: 25s; animation-name: flyRight; }
-        .flyer:nth-child(2) { top: 60%; right: -10%; animation-duration: 30s; animation-name: flyLeft; }
-        .flyer:nth-child(3) { bottom: 10%; left: -10%; animation-duration: 22s; animation-name: flyRightWave; }
-        .flyer:nth-child(4) { top: 30%; right: -10%; animation-duration: 28s; animation-name: flyLeftWave; }
-        .flyer:nth-child(5) { top: 80%; left: 20%; animation-duration: 35s; animation-name: floatUp; }
-
-        @keyframes flyRight { 0% { transform: translate(0vw, 0) rotate(0deg); } 100% { transform: translate(120vw, 100px) rotate(15deg); } }
-        @keyframes flyLeft { 0% { transform: translate(0vw, 0) rotate(0deg); } 100% { transform: translate(-120vw, -50px) rotate(-15deg); } }
-        @keyframes flyRightWave { 0% { transform: translate(0vw, 0) rotate(-10deg); } 50% { transform: translate(50vw, -100px) rotate(10deg); } 100% { transform: translate(120vw, 0) rotate(-10deg); } }
-        @keyframes flyLeftWave { 0% { transform: translate(0vw, 0) rotate(10deg); } 50% { transform: translate(-50vw, 150px) rotate(-10deg); } 100% { transform: translate(-120vw, 0) rotate(10deg); } }
-        @keyframes floatUp { 0% { transform: translate(0, 120vh) rotate(0deg); } 100% { transform: translate(50px, -120vh) rotate(20deg); } }
-
-        /* 測驗主體區塊 */
-        .main-container {
-            background: var(--nj-white);
-            border: var(--box-border);
-            box-shadow: 12px 12px 0px #000;
-            border-radius: 20px;
-            max-width: 650px;
-            width: 100%;
-            padding: 30px;
-            position: relative;
-            z-index: 10;
-            opacity: 0; /* 初始隱藏，等進場動畫結束才出現 */
-            transform: scale(0.8);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .main-container.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        h1.mixed-title {
-            text-align: center;
-            font-size: 3.5rem;
-            margin: 0 0 10px 0;
-            letter-spacing: 2px;
-            color: var(--nj-lime);
-            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
-        }
-
-        h1.mixed-title span:nth-child(1) { font-family: 'Chewy', cursive; }
-        h1.mixed-title span:nth-child(2) { font-family: 'Press Start 2P', cursive; font-size: 2.2rem; }
-        h1.mixed-title span:nth-child(3) { font-family: 'Pacifico', cursive; }
-        h1.mixed-title span:nth-child(4) { font-family: 'VT323', monospace; font-size: 3.8rem;}
-        h1.mixed-title span:nth-child(5) { font-family: 'Helvetica', sans-serif; font-weight: bold; font-style: italic;}
+        h1.title { font-family: 'VT323', monospace; text-align: center; font-size: 3.5rem; margin: 0 0 5px 0; color: #FFF; letter-spacing: 3px; font-weight: normal; }
+        .subtitle { text-align: center; color: var(--vhs-gray); font-size: 0.9rem; margin-bottom: 25px; letter-spacing: 2px; font-weight: 300; }
         
-        .subtitle {
-            text-align: center;
-            background: var(--nj-lime);
-            border: 3px solid #000;
-            border-radius: 50px;
-            padding: 5px 15px;
-            font-weight: bold;
-            display: inline-block;
-            margin: 0 auto 30px auto;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
+        .marquee-container {
+            background: rgba(192, 57, 43, 0.15); color: var(--text-glow); border-top: 1px solid var(--vhs-red); border-bottom: 1px solid var(--vhs-red);
+            font-family: 'VT323', monospace; padding: 6px 0; letter-spacing: 2px; margin-bottom: 30px; font-size: 1.2rem; text-shadow: 1px 1px 2px #000;
         }
 
-        .question-block {
-            margin-bottom: 25px;
-            padding: 15px;
-            background: #F8F8F8;
-            border: 3px solid #000;
-            border-radius: 15px;
-            transition: 0.3s;
+        /* 影片區塊 */
+        #video-view { display: none; width: 100%; text-align: center; }
+        video { width: 100%; border-radius: 5px; border: 1px solid #444; filter: contrast(1.1) brightness(0.9); }
+
+        /* 單題作答區塊 */
+        #quiz-view { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        
+        .q-counter { font-family: 'VT323', monospace; font-size: 1.5rem; color: var(--vhs-gray); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+        .question-text { font-weight: 400; display: block; margin-bottom: 25px; color: #FFF; font-size: 1.2rem; line-height: 1.6; }
+        
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn {
+            background: transparent; color: var(--vhs-gray); border: 1px solid #444;
+            padding: 12px 20px; cursor: pointer; font-size: 1rem; transition: 0.2s; border-radius: 3px;
+            text-align: left; font-family: 'Noto Sans TC', sans-serif;
         }
+        .option-btn:hover { border-color: #FFF; color: #FFF; padding-left: 25px; background: rgba(255,255,255,0.05); }
 
-        .question-block:hover {
-            background: #E8F6FF;
-            transform: translateX(5px);
+        .btn-action {
+            width: 100%; background: transparent; color: #FFF; border: 1px solid #FFF;
+            padding: 15px; font-size: 1.5rem; font-family: 'VT323', monospace; cursor: pointer;
+            letter-spacing: 4px; transition: 0.3s;
         }
+        .btn-action:hover { background: #FFF; color: #000; }
 
-        .question-text {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .options label {
-            background: #FFF;
-            border: 2px solid #000;
-            border-radius: 30px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .options input[type="radio"] { display: none; }
-        .options input[type="radio"]:checked + span { background: var(--nj-lime); color: #000; }
-        .options span { display: inline-block; width: 100%; height: 100%; }
-
-        button[type="submit"], .btn-action {
-            width: 100%;
-            background: var(--nj-lime);
-            color: #000;
-            border: 4px solid #000;
-            border-radius: 50px;
-            padding: 15px;
-            font-size: 1.5rem;
-            font-family: 'Chewy', cursive;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.2s;
-            text-shadow: 1px 1px 0px #FFF;
-        }
-
-        button[type="submit"]:hover, .btn-action:hover {
-            background: #FFF;
-            transform: translateY(-3px);
-            box-shadow: 0px 5px 0px #000;
-        }
-
+        /* 結果區塊 */
+        #result-view { display: none; text-align: center; }
         #result-box {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            border: 4px solid #000;
-            border-radius: 20px;
-            background: var(--nj-white);
-            margin-top: 20px;
-            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 30px 20px; border: 1px solid #555; background: rgba(0,0,0,0.5); margin-bottom: 20px;
         }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            80% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #result-title {
-            font-family: 'Chewy', cursive;
-            font-size: 2.5rem;
-            margin: 10px 0;
-            letter-spacing: 2px;
-        }
+        #result-title { font-family: 'VT323', monospace; font-size: 2.2rem; margin-bottom: 10px; font-weight: normal;}
     </style>
 </head>
 <body>
 
-<!-- 🌟 進場動畫覆蓋層 🌟 -->
+<svg style="display:none;">
+    <filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter>
+</svg>
+
 <div id="intro-screen">
-    <div class="loading-text">ATTENTION!</div>
-    <div class="progress-box">
-        <div class="progress-bar"></div>
-    </div>
+    <div class="vcr-text play-icon">PLAY ▶</div>
+    <div class="vcr-text">TAPE 01: NJDI_ARCHIVE</div>
 </div>
 
-<audio id="bgm" loop>
-    <source src="your-music-file.mp3" type="audio/mpeg">
-</audio>
+<div id="flash-overlay"></div>
 
-<button id="music-control" onclick="toggleMusic()">🎵 Play BGM</button>
-
-<div class="flyer-container" id="flyer-bg">
-    <img class="flyer" src="https://via.placeholder.com/80/FFB3C6/000000?text=Minji" alt="Minji">
-    <img class="flyer" src="https://via.placeholder.com/80/B1D8F4/000000?text=Hanni" alt="Hanni">
-    <img class="flyer" src="https://via.placeholder.com/80/FFFFA6/000000?text=Dani" alt="Danielle">
-    <img class="flyer" src="https://via.placeholder.com/80/B4F8C8/000000?text=Haerin" alt="Haerin">
-    <img class="flyer" src="https://via.placeholder.com/80/E5B3FE/000000?text=Hyein" alt="Hyein">
+<div id="transition-screen">
+    <div class="static-noise-bg"></div>
+    <div class="transition-status" id="vcr-status">ANALYZING_MIND...</div>
+    <img id="bunny-glitch" src="bunny.gif" alt="Glitch Bunny">
 </div>
 
-<div class="main-container" id="main-content">
-    <h1 class="mixed-title">
-        <span>N</span><span>J</span><span>D</span><span>I</span> <span>Test</span>
-    </h1>
-    <div class="subtitle">鯨鬱症自我檢測量表</div>
+<div class="camcorder-ui rec"><div class="rec-dot"></div> REC</div>
+<div class="camcorder-ui battery">■■■□</div>
+<div class="camcorder-ui date" id="vcr-date"></div>
 
-    <form id="njdi-form">
-        <div id="questions-container"></div>
-        <button type="submit">確認診斷結果！</button>
-    </form>
+<audio id="bgm" loop><source src="ditto-bgm.mp3" type="audio/mpeg"></audio>
+<audio id="static-sound"><source src="tv-static.mp3" type="audio/mpeg"></audio>
 
-    <div id="result-box">
-        <h2 id="result-title"></h2>
-        <p style="font-size: 1.2rem;">診斷分數：<strong id="result-score" style="font-size: 1.8rem; color: var(--bg-blue);"></strong> / 30</p>
-        <p id="result-desc" style="font-weight: bold; margin-top: 15px; line-height: 1.6;"></p>
-        <button type="button" class="btn-action" onclick="location.reload()">再測一次 🐰</button>
+<div class="window" id="main-content">
+    <div class="window-content">
+        
+        <div id="start-view">
+            <h1 class="title">NJDI_ARCHIVE</h1>
+            <div class="subtitle">鯨鬱症自我檢測 / VCR.1</div>
+            <div class="marquee-container">
+                <marquee scrollamount="5">⚠️ 請確認周圍環境安全，戴上耳機以獲得最佳體驗。 ⚠️</marquee>
+            </div>
+            <button id="btn-start" class="btn-action">▶ INSERT TAPE (開始測驗)</button>
+        </div>
+
+        <div id="video-view">
+            <video id="intro-video" src="open.mp4" playsinline></video>
+            <div style="font-family: 'VT323'; color: #666; margin-top:10px; letter-spacing: 2px;">PLAYING...</div>
+        </div>
+
+        <div id="quiz-view">
+            <div class="q-counter" id="q-counter">Q_01 / 10</div>
+            <div class="question-text" id="question-text">題目文字</div>
+            <div class="options" id="options-container">
+                </div>
+        </div>
+
+        <div id="result-view">
+            <div id="result-box">
+                <h2 id="result-title"></h2>
+                <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong> / 30</p>
+                <p id="result-desc" style="font-weight: 300; margin-top: 20px; line-height: 1.8; color: #ddd; text-align: left;"></p>
+            </div>
+            <button type="button" class="btn-action" onclick="location.reload()">↺ REWIND TAPE</button>
+        </div>
+
     </div>
 </div>
 
 <script>
-    // 🌟 進場動畫邏輯 🌟
-    window.addEventListener('load', () => {
-        // 設定 2.2 秒後結束讀取動畫
-        setTimeout(() => {
-            const introScreen = document.getElementById('intro-screen');
-            const mainContent = document.getElementById('main-content');
-            const flyerBg = document.getElementById('flyer-bg');
-            const musicBtn = document.getElementById('music-control');
+    // 初始化日期
+    const today = new Date();
+    document.getElementById('vcr-date').innerText = `1998.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
 
-            // 1. 讀取畫面往上滑走
-            introScreen.classList.add('hidden');
-            
-            // 2. 主內容彈跳出現
-            mainContent.classList.add('show');
-            
-            // 3. 背景小飛人浮現
-            flyerBg.classList.add('show');
-
-            // 4. 音樂按鈕浮現
-            musicBtn.classList.add('show');
-            
-            // 等動畫結束後徹底隱藏讀取層，避免擋住點擊
-            setTimeout(() => {
-                introScreen.style.display = 'none';
-            }, 800);
-
-        }, 2200); 
-    });
-
-    // 音樂控制邏輯
+    // DOM 元素
+    const introScreen = document.getElementById('intro-screen');
+    const startView = document.getElementById('start-view');
+    const videoView = document.getElementById('video-view');
+    const quizView = document.getElementById('quiz-view');
+    const resultView = document.getElementById('result-view');
+    const introVideo = document.getElementById('intro-video');
+    const flashOverlay = document.getElementById('flash-overlay');
     const bgm = document.getElementById('bgm');
-    const musicBtn = document.getElementById('music-control');
-    let isPlaying = false;
 
-    function toggleMusic() {
-        if (isPlaying) {
-            bgm.pause();
-            musicBtn.innerText = "🎵 Play BGM";
-        } else {
-            bgm.play();
-            musicBtn.innerText = "⏸️ Pause BGM";
-        }
-        isPlaying = !isPlaying;
-    }
+    // 測驗變數
+    let currentQuestionIndex = 0;
+    let totalScore = 0;
 
-    // 題目資料
     const questions = [
-        "每次看到藍色的東西，大腦會自動聯想到 NewJeans。",
-        "當官方超過三天沒更新時，會感到明顯的寂寞與心慌。",
-        "看到兔子、貓、或麵包時，會不由自主地聯想到成員。",
-        "腦中經常自動播放《Ditto》或《OMG》的旋律，揮之不去。",
-        "願意為了購買周邊或訂閱 Phoning 而壓縮生活開支。",
-        "社交平台上 80% 以上的推播內容都與她們相關。",
-        "日常說話會不自覺帶入成員的語氣（如：Hehe, OMG）。",
-        "看到 Y2K 風格的穿搭會產生極強的購買衝動。",
-        "對於成員的成長感到老母親/老父親般的欣慰。",
-        "生活唯一的重心就是等待下一次回歸（Comeback）。"
+        "看到舊式的錄影帶或制服，會不自覺陷入對她們的思念。",
+        "當周圍安靜下來時，腦海裡總會迴盪著《Ditto》的哼唱聲。",
+        "對於錯過的官方直播或訊息，會產生一種難以言喻的失落感。",
+        "手機相簿裡存滿了她們的照片，就像捨不得刪除的舊回憶。",
+        "為了收藏與她們有關的物品，願意犧牲掉其他的日常開銷。",
+        "社群媒體上的時間線，已經完全被與她們相關的碎片佔據。",
+        "日常生活中，會默默模仿她們的穿搭風格（如復古寬褲、耳機）。",
+        "看著她們的影片時，會有一種既溫暖又莫名想哭的衝動。",
+        "對於成員的成長與改變，內心充滿了老朋友般的欣慰與感傷。",
+        "感覺生活的某一部分，已經永遠停留在等待她們出現的那個冬天。"
     ];
 
-    const container = document.getElementById('questions-container');
-
-    questions.forEach((q, index) => {
-        const block = document.createElement('div');
-        block.className = 'question-block';
-        block.innerHTML = `
-            <span class="question-text">Q${index + 1}. ${q}</span>
-            <div class="options">
-                <label><input type="radio" name="q${index}" value="0" required><span>從不</span></label>
-                <label><input type="radio" name="q${index}" value="1"><span>偶爾</span></label>
-                <label><input type="radio" name="q${index}" value="2"><span>經常</span></label>
-                <label><input type="radio" name="q${index}" value="3"><span>總是</span></label>
-            </div>
-        `;
-        container.appendChild(block);
+    // 1. 開場淡出，顯示開始按鈕
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            introScreen.classList.add('hidden');
+            setTimeout(() => { 
+                introScreen.style.display = 'none'; 
+                document.getElementById('main-content').classList.add('show');
+            }, 1500); 
+        }, 2000); 
     });
 
-    // 提交邏輯
-    document.getElementById('njdi-form').addEventListener('submit', function(e) {
-        e.preventDefault();
+    // 2. 點擊開始測驗 -> 播放影片
+    document.getElementById('btn-start').addEventListener('click', () => {
+        startView.style.display = 'none';
+        videoView.style.display = 'block';
         
-        let score = 0;
-        const formData = new FormData(this);
-        for (let value of formData.values()) {
-            score += parseInt(value);
-        }
+        // 確保影片播放，同時啟動背景音樂 (如果影片有聲音，可以把 bgm.play() 註解掉或調低音量)
+        introVideo.play().catch(e => console.log("Video Autoplay Blocked:", e));
+        bgm.volume = 0.4; 
+        bgm.play().catch(e => console.log("BGM Blocked"));
+    });
 
-        let result = {};
-        if (score <= 8) {
-            result = { status: "健康小兔子", desc: "狀態穩定！目前處於理性欣賞階段，請繼續保持這份熱愛。", color: "#A3FF22" };
-        } else if (score <= 18) {
-            result = { status: "輕中度鯨鬱", desc: "出現依賴症狀！建議每天聽三遍《Attention》並補充兔子維他命來穩定心率。", color: "#FFFFA6" };
+    // 3. 影片播完 -> 白光過場 -> 顯示第一題
+    introVideo.addEventListener('ended', () => {
+        flashOverlay.classList.add('flash-anim'); // 畫面閃爍
+        
+        setTimeout(() => {
+            videoView.style.display = 'none';
+            quizView.style.display = 'block';
+            renderQuestion(); // 渲染第一題
+        }, 200); // 趁白光最亮時切換畫面
+        
+        setTimeout(() => flashOverlay.classList.remove('flash-anim'), 600);
+    });
+
+    // 渲染題目函數
+    function renderQuestion() {
+        // 重置動畫，製造切換頻道的感覺
+        quizView.style.animation = 'none';
+        quizView.offsetHeight; /* 觸發 Reflow */
+        quizView.style.animation = null;
+
+        document.getElementById('q-counter').innerText = `Q_${String(currentQuestionIndex + 1).padStart(2, '0')} / 10`;
+        document.getElementById('question-text').innerText = questions[currentQuestionIndex];
+        
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = ''; // 清空選項
+
+        const optionLabels = ["從不", "偶爾", "經常", "總是"];
+        optionLabels.forEach((label, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = `[ ${index} ] ${label}`;
+            btn.onclick = () => handleAnswer(index);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    // 處理作答
+    function handleAnswer(score) {
+        totalScore += score;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            renderQuestion(); // 還有題目就繼續渲染
         } else {
-            result = { status: "鯨鬱症末期", desc: "已無藥可醫 ⚠️ 建議直接搬到 ADOR 公司門口實習，你就是第六位成員！", color: "#FFB3C6" };
+            showFinalGlitch(); // 沒題目了，播放結尾故障動畫
         }
+    }
 
-        this.style.display = 'none';
+    // 4. 結尾故障動畫與結果計算
+    function showFinalGlitch() {
+        quizView.style.display = 'none';
+        
+        const transitionScreen = document.getElementById('transition-screen');
+        const staticAudio = document.getElementById('static-sound');
+        const vcrStatus = document.getElementById('vcr-status');
+        const bunnyGlitch = document.getElementById('bunny-glitch');
         const resultBox = document.getElementById('result-box');
-        const rTitle = document.getElementById('result-title');
         
-        resultBox.style.display = 'block';
-        rTitle.innerText = result.status;
-        rTitle.style.color = result.color;
-        rTitle.style.WebkitTextStroke = "2px black"; 
-        
-        document.getElementById('result-score').innerText = score;
-        document.getElementById('result-desc').innerText = result.desc;
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+        transitionScreen.style.display = 'flex';
+        staticAudio.play().catch(e => console.log('Audio blocked'));
+
+        setTimeout(() => {
+            bunnyGlitch.style.display = 'block';
+            vcrStatus.innerText = "ERROR: UNKNOWN_RABBIT_DETECTED";
+            vcrStatus.style.color = "red";
+        }, 1200);
+
+        setTimeout(() => {
+            flashOverlay.classList.add('flash-anim');
+            
+            setTimeout(() => {
+                transitionScreen.style.display = 'none';
+                staticAudio.pause(); staticAudio.currentTime = 0;
+                resultView.style.display = 'block'; // 顯示結果容器
+                
+                let result = {};
+                if (totalScore <= 8) {
+                    result = { status: "STATUS: STABLE", desc: "你的思緒依然清晰。這是一份健康且理性的欣賞，請將這份美好妥善收藏。", color: "#a8d8ea" };
+                } else if (totalScore <= 18) {
+                    result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9" };
+                } else {
+                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d" };
+                }
+
+                const title = document.getElementById('result-title');
+                title.innerText = result.status;
+                title.style.color = result.color;
+                document.getElementById('result-score').innerText = totalScore;
+                document.getElementById('result-desc').innerText = result.desc;
+            }, 100); 
+
+            setTimeout(() => {
+                flashOverlay.classList.remove('flash-anim');
+                bunnyGlitch.style.display = 'none';
+                vcrStatus.innerText = "ANALYZING_MIND...";
+                vcrStatus.style.color = "white";
+            }, 800);
+
+        }, 3000);
+    }
 </script>
 
 </body>
