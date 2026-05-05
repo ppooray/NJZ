@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJDI 鯨鬱症量表 - Attention!</title>
-    <!-- 引入多種字體來模擬 Attention Logo 的拼貼感 -->
     <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Pacifico&family=Press+Start+2P&family=VT323&family=Noto+Sans+TC:wght@400;700&family=Helvetica&display=swap" rel="stylesheet">
     <style>
-        /* 定義 Bluebook 時期的核心色彩 */
         :root {
-            --bg-blue: #3CB4F6; /* 參考圖片底色 */
-            --nj-lime: #A3FF22; /* Attention 的萊姆綠 */
+            --bg-blue: #3CB4F6;
+            --nj-lime: #A3FF22;
             --nj-white: #FFFFFF;
             --box-border: 4px solid #000;
         }
@@ -24,11 +22,67 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden; /* 防止飛天小女警飛出視窗產生捲軸 */
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* 背景音樂控制按鈕 */
+        /* 🌟 進場動畫讀取畫面 🌟 */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-blue);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        #intro-screen.hidden {
+            transform: translateY(-100vh); /* 向上滑出螢幕 */
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--nj-lime);
+            text-shadow: 3px 3px 0px #000;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: blink 1s infinite;
+        }
+
+        .progress-box {
+            width: 300px;
+            height: 30px;
+            border: 4px solid #000;
+            background: #FFF;
+            padding: 4px;
+            box-shadow: 5px 5px 0px #000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--nj-lime);
+            width: 0%;
+            animation: fillBar 2s steps(10) forwards;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes fillBar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* 音樂控制按鈕 */
         #music-control {
             position: fixed;
             top: 20px;
@@ -43,6 +97,13 @@
             border-radius: 50px;
             box-shadow: 4px 4px 0px #000;
             transition: 0.2s;
+            opacity: 0; /* 初始隱藏，等動畫播完再出現 */
+            transform: translateY(-20px);
+        }
+
+        #music-control.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         #music-control:hover {
@@ -57,18 +118,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* 讓點擊可以穿透圖片按到後面的題目 */
+            pointer-events: none;
             z-index: 0;
+            opacity: 0; /* 初始隱藏 */
+            transition: opacity 1s ease-in-out;
+        }
+
+        .flyer-container.show {
+            opacity: 1;
         }
 
         .flyer {
             position: absolute;
-            width: 80px; /* 圖片大小，你可以自訂 */
+            width: 80px;
             opacity: 0.8;
             animation: floatAround linear infinite;
         }
 
-        /* 給五位成員不同的飛行軌跡和速度 */
         .flyer:nth-child(1) { top: 10%; left: -10%; animation-duration: 25s; animation-name: flyRight; }
         .flyer:nth-child(2) { top: 60%; right: -10%; animation-duration: 30s; animation-name: flyLeft; }
         .flyer:nth-child(3) { bottom: 10%; left: -10%; animation-duration: 22s; animation-name: flyRightWave; }
@@ -81,21 +147,27 @@
         @keyframes flyLeftWave { 0% { transform: translate(0vw, 0) rotate(10deg); } 50% { transform: translate(-50vw, 150px) rotate(-10deg); } 100% { transform: translate(-120vw, 0) rotate(10deg); } }
         @keyframes floatUp { 0% { transform: translate(0, 120vh) rotate(0deg); } 100% { transform: translate(50px, -120vh) rotate(20deg); } }
 
-
         /* 測驗主體區塊 */
         .main-container {
             background: var(--nj-white);
             border: var(--box-border);
             box-shadow: 12px 12px 0px #000;
-            border-radius: 20px; /* 圓角更符合 Bluebook 風格 */
+            border-radius: 20px;
             max-width: 650px;
             width: 100%;
             padding: 30px;
             position: relative;
-            z-index: 10; /* 確保在飛天小女警之上 */
+            z-index: 10;
+            opacity: 0; /* 初始隱藏，等進場動畫結束才出現 */
+            transform: scale(0.8);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 拼貼風標題設計 */
+        .main-container.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         h1.mixed-title {
             text-align: center;
             font-size: 3.5rem;
@@ -105,12 +177,11 @@
             text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
         }
 
-        /* 根據你提供的圖片，將每個字母套用不同字體 */
-        h1.mixed-title span:nth-child(1) { font-family: 'Chewy', cursive; } /* 泡泡體 */
-        h1.mixed-title span:nth-child(2) { font-family: 'Press Start 2P', cursive; font-size: 2.2rem; } /* 像素體 */
-        h1.mixed-title span:nth-child(3) { font-family: 'Pacifico', cursive; } /* 手寫體 */
-        h1.mixed-title span:nth-child(4) { font-family: 'VT323', monospace; font-size: 3.8rem;} /* 窄版像素 */
-        h1.mixed-title span:nth-child(5) { font-family: 'Helvetica', sans-serif; font-weight: bold; font-style: italic;} /* 無襯線 */
+        h1.mixed-title span:nth-child(1) { font-family: 'Chewy', cursive; }
+        h1.mixed-title span:nth-child(2) { font-family: 'Press Start 2P', cursive; font-size: 2.2rem; }
+        h1.mixed-title span:nth-child(3) { font-family: 'Pacifico', cursive; }
+        h1.mixed-title span:nth-child(4) { font-family: 'VT323', monospace; font-size: 3.8rem;}
+        h1.mixed-title span:nth-child(5) { font-family: 'Helvetica', sans-serif; font-weight: bold; font-style: italic;}
         
         .subtitle {
             text-align: center;
@@ -126,7 +197,6 @@
             transform: translateX(-50%);
         }
 
-        /* 題目區塊 */
         .question-block {
             margin-bottom: 25px;
             padding: 15px;
@@ -165,23 +235,9 @@
             transition: 0.2s;
         }
 
-        /* 隱藏原生 radio 按鈕 */
-        .options input[type="radio"] {
-            display: none;
-        }
-
-        /* 被選中時的樣式 */
-        .options input[type="radio"]:checked + span {
-            background: var(--nj-lime);
-            color: #000;
-        }
-        
-        .options span {
-            display: inline-block;
-            width: 100%;
-            height: 100%;
-        }
-
+        .options input[type="radio"] { display: none; }
+        .options input[type="radio"]:checked + span { background: var(--nj-lime); color: #000; }
+        .options span { display: inline-block; width: 100%; height: 100%; }
 
         button[type="submit"], .btn-action {
             width: 100%;
@@ -204,7 +260,6 @@
             box-shadow: 0px 5px 0px #000;
         }
 
-        /* 結果區塊 */
         #result-box {
             display: none;
             text-align: center;
@@ -232,18 +287,21 @@
 </head>
 <body>
 
-<!-- 背景音樂音檔 (請把 src 換成你的 mp3 檔案路徑) -->
+<!-- 🌟 進場動畫覆蓋層 🌟 -->
+<div id="intro-screen">
+    <div class="loading-text">ATTENTION!</div>
+    <div class="progress-box">
+        <div class="progress-bar"></div>
+    </div>
+</div>
+
 <audio id="bgm" loop>
-    <!-- 你可以放 Ditto 或 Super Shy 的伴奏版 -->
     <source src="your-music-file.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 音樂控制鈕 -->
 <button id="music-control" onclick="toggleMusic()">🎵 Play BGM</button>
 
-<!-- 飛天小女警動畫區塊 (請把 src 換成你抓下來的去背 PNG) -->
-<div class="flyer-container">
-    <!-- 這裡我先用色塊代替，到時候直接把 src 換成成員的圖 -->
+<div class="flyer-container" id="flyer-bg">
     <img class="flyer" src="https://via.placeholder.com/80/FFB3C6/000000?text=Minji" alt="Minji">
     <img class="flyer" src="https://via.placeholder.com/80/B1D8F4/000000?text=Hanni" alt="Hanni">
     <img class="flyer" src="https://via.placeholder.com/80/FFFFA6/000000?text=Dani" alt="Danielle">
@@ -251,8 +309,7 @@
     <img class="flyer" src="https://via.placeholder.com/80/E5B3FE/000000?text=Hyein" alt="Hyein">
 </div>
 
-<div class="main-container">
-    <!-- 拼貼風標題：每個 span 套用不同字體 -->
+<div class="main-container" id="main-content">
     <h1 class="mixed-title">
         <span>N</span><span>J</span><span>D</span><span>I</span> <span>Test</span>
     </h1>
@@ -272,6 +329,35 @@
 </div>
 
 <script>
+    // 🌟 進場動畫邏輯 🌟
+    window.addEventListener('load', () => {
+        // 設定 2.2 秒後結束讀取動畫
+        setTimeout(() => {
+            const introScreen = document.getElementById('intro-screen');
+            const mainContent = document.getElementById('main-content');
+            const flyerBg = document.getElementById('flyer-bg');
+            const musicBtn = document.getElementById('music-control');
+
+            // 1. 讀取畫面往上滑走
+            introScreen.classList.add('hidden');
+            
+            // 2. 主內容彈跳出現
+            mainContent.classList.add('show');
+            
+            // 3. 背景小飛人浮現
+            flyerBg.classList.add('show');
+
+            // 4. 音樂按鈕浮現
+            musicBtn.classList.add('show');
+            
+            // 等動畫結束後徹底隱藏讀取層，避免擋住點擊
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+            }, 800);
+
+        }, 2200); 
+    });
+
     // 音樂控制邏輯
     const bgm = document.getElementById('bgm');
     const musicBtn = document.getElementById('music-control');
@@ -345,7 +431,7 @@
         resultBox.style.display = 'block';
         rTitle.innerText = result.status;
         rTitle.style.color = result.color;
-        rTitle.style.WebkitTextStroke = "2px black"; // 加強文字的塗鴉感
+        rTitle.style.WebkitTextStroke = "2px black"; 
         
         document.getElementById('result-score').innerText = score;
         document.getElementById('result-desc').innerText = result.desc;
