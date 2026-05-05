@@ -34,12 +34,13 @@
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #000; z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 1.5s ease;
+            justify-content: center; align-items: center; transition: opacity 1.5s ease; cursor: pointer;
         }
         #intro-screen.hidden { opacity: 0; pointer-events: none; }
 
         .vcr-text { font-family: 'VT323', monospace; color: #FFF; font-size: 2.5rem; letter-spacing: 5px; text-shadow: 2px 2px 4px rgba(255,255,255,0.3); }
         .play-icon { font-size: 3rem; margin-bottom: 20px; animation: flicker 0.5s infinite alternate; }
+        .click-hint { font-family: 'VT323', monospace; color: var(--vhs-red); font-size: 1.5rem; margin-top: 40px; animation: blink 1.5s infinite; letter-spacing: 3px;}
         @keyframes flicker { 0% { opacity: 0.8; } 100% { opacity: 0.2; } }
 
         /* 攝影機 UI 元素 */
@@ -133,29 +134,29 @@
         }
         .btn-action:hover { background: #FFF; color: #000; }
 
+        /* 等待動畫區塊 */
+        #wait-view { display: none; text-align: center; }
+
         /* 結果區塊 */
         #result-view { display: none; text-align: center; }
-        #result-box {
-            padding: 30px 20px; border: 1px solid #555; background: rgba(0,0,0,0.5); margin-bottom: 20px;
-        }
+        #result-box { padding: 30px 20px; border: 1px solid #555; background: rgba(0,0,0,0.5); margin-bottom: 20px; }
         #result-title { font-family: 'VT323', monospace; font-size: 2.2rem; margin-bottom: 10px; font-weight: normal;}
+
+        /* 分享按鈕群組 */
+        .share-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        .btn-share { flex: 1; padding: 10px; font-size: 1.2rem; border: 1px solid var(--vhs-gray); background: transparent; color: #FFF; font-family: 'VT323', 'Noto Sans TC'; cursor: pointer; transition: 0.3s;}
+        .btn-share.threads { border-color: #e0a96d; color: #e0a96d; }
+        .btn-share:hover { background: rgba(255,255,255,0.1); }
 
         /* 背景音樂按鈕固定在左下角 */
         #music-control {
-            position: fixed; 
-            bottom: 30px; 
-            left: 30px; 
-            background: transparent;
-            color: var(--vhs-gray); 
-            border: 1px solid var(--vhs-gray); 
-            padding: 5px 10px;
-            font-family: 'VT323', monospace; 
-            font-size: 1.2rem; 
-            cursor: pointer;
-            z-index: 1000; 
-            transition: 0.3s;
+            position: fixed; bottom: 30px; left: 30px; background: transparent;
+            color: #FFF; /* 預設開啟狀態的顏色 */
+            border: 1px solid var(--vhs-gray); padding: 5px 10px;
+            font-family: 'VT323', monospace; font-size: 1.2rem; cursor: pointer;
+            z-index: 1000; transition: 0.3s;
         }
-        #music-control:hover { color: #FFF; border-color: #FFF; }
+        #music-control:hover { border-color: #FFF; }
     </style>
 </head>
 <body>
@@ -164,9 +165,11 @@
     <filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter>
 </svg>
 
+<!-- 開場必須點擊，解鎖自動播放 -->
 <div id="intro-screen">
     <div class="vcr-text play-icon">PLAY ▶</div>
     <div class="vcr-text">TAPE 01: NJDI_ARCHIVE</div>
+    <div class="click-hint">[ CLICK ANYWHERE TO START ]</div>
 </div>
 
 <div id="flash-overlay"></div>
@@ -181,11 +184,17 @@
 <div class="camcorder-ui battery">■■■□</div>
 <div class="camcorder-ui date" id="vcr-date"></div>
 
-<audio id="bgm" loop><source src="ditto-bgm.mp3" type="audio/mpeg"></audio>
+<!-- 🎶 音軌資料庫 (請對應準備這些檔案) -->
+<audio id="bgm-start" loop><source src="start-bgm.mp3" type="audio/mpeg"></audio> <!-- 開始畫面的音樂 -->
+<audio id="bgm-quiz" loop><source src="ditto-bgm.mp3" type="audio/mpeg"></audio> <!-- 測驗中的音樂 -->
+<audio id="bgm-res-stable" loop><source src="result-stable.mp3" type="audio/mpeg"></audio> <!-- 結果 1 音樂 -->
+<audio id="bgm-res-nostalgic" loop><source src="result-nostalgic.mp3" type="audio/mpeg"></audio> <!-- 結果 2 音樂 -->
+<audio id="bgm-res-lost" loop><source src="result-lost.mp3" type="audio/mpeg"></audio> <!-- 結果 3 音樂 -->
+
 <audio id="static-sound"><source src="tv-static.mp3" type="audio/mpeg"></audio>
 <audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
 
-<button id="music-control" onclick="toggleMusic()">[ 🎵 BGM: ON / OFF ]</button>
+<button id="music-control" onclick="toggleMusic()">[ 🎵 BGM: ON ]</button>
     
 <div class="window" id="main-content">
     <div class="window-content">
@@ -199,21 +208,23 @@
             <button id="btn-start" class="btn-action">▶ INSERT TAPE (開始測驗)</button>
         </div>
 
-        <!-- 狀態 2：影片播放區塊 -->
         <div id="video-view">
-            <!-- 🎬 將 src 替換為你的影片檔名 -->
             <video id="intro-video" src="open.mp4" playsinline></video>
             <div style="font-family: 'VT323'; color: #666; margin-top:10px; letter-spacing: 2px;">PLAYING...</div>
-            
-            <!-- 新增的跳過按鈕 -->
             <button id="btn-skip-video" class="btn-action" style="margin-top: 20px; font-size: 1.2rem; padding: 10px;">▶▶ FAST FORWARD (跳過影片)</button>
         </div>
 
         <div id="quiz-view">
             <div class="q-counter" id="q-counter">Q_01 / 10</div>
             <div class="question-text" id="question-text">題目文字</div>
-            <div class="options" id="options-container">
-                </div>
+            <div class="options" id="options-container"></div>
+        </div>
+
+        <!-- 🎬 新增：等待動畫區塊 -->
+        <div id="wait-view">
+            <!-- 將 waiting.mp4 替換成你的過場動畫 -->
+            <video id="wait-video" src="waiting.mp4" playsinline muted style="width: 100%; border: 1px solid #444; border-radius: 5px;"></video>
+            <div style="font-family: 'VT323'; color: #aaa; margin-top:15px; letter-spacing: 4px; animation: blink 1s infinite;">PROCESSING_DATA...</div>
         </div>
 
         <div id="result-view">
@@ -222,14 +233,18 @@
                 <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong> / 30</p>
                 <p id="result-desc" style="font-weight: 300; margin-top: 20px; line-height: 1.8; color: #ddd; text-align: left;"></p>
             </div>
-            <button type="button" class="btn-action" onclick="location.reload()">↺ REWIND TAPE</button>
+            
+            <div class="share-group">
+                <button onclick="shareToThreads()" class="btn-share threads">@ Threads</button>
+                <button onclick="shareResult()" class="btn-share">↗ Share IG/Link</button>
+            </div>
+            <button type="button" class="btn-action" onclick="location.reload()" style="margin-top: 15px;">↺ REWIND TAPE</button>
         </div>
 
     </div>
 </div>
 
 <script>
-    // 初始化日期
     const today = new Date();
     document.getElementById('vcr-date').innerText = `1998.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
 
@@ -238,14 +253,57 @@
     const startView = document.getElementById('start-view');
     const videoView = document.getElementById('video-view');
     const quizView = document.getElementById('quiz-view');
+    const waitView = document.getElementById('wait-view');
     const resultView = document.getElementById('result-view');
+    
     const introVideo = document.getElementById('intro-video');
+    const waitVideo = document.getElementById('wait-video');
     const flashOverlay = document.getElementById('flash-overlay');
-    const bgm = document.getElementById('bgm');
 
-    // 測驗變數
     let currentQuestionIndex = 0;
     let totalScore = 0;
+
+    // --- 🎵 全域音樂控制器 ---
+    let currentBgm = null; // 記錄目前正在播哪一首
+    let isMusicOn = true;  // 預設 ON
+
+    function playClickSound() {
+        const clickAudio = document.getElementById('click-sound');
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(e => {});
+    }
+
+    // 智能播放音樂：自動暫停上一首，切換下一首
+    function switchBgm(newBgmElement) {
+        if (currentBgm && currentBgm !== newBgmElement) {
+            currentBgm.pause();
+            currentBgm.currentTime = 0;
+        }
+        currentBgm = newBgmElement;
+        
+        if (isMusicOn && currentBgm) {
+            currentBgm.volume = 1.0;
+            currentBgm.play().catch(e => console.log('BGM Play Blocked'));
+        }
+    }
+
+    // ON/OFF 切換按鈕邏輯
+    function toggleMusic() {
+        playClickSound();
+        isMusicOn = !isMusicOn;
+        const btn = document.getElementById('music-control');
+        
+        if (isMusicOn) {
+            if (currentBgm) currentBgm.play();
+            btn.innerText = "[ 🎵 BGM: ON ]";
+            btn.style.color = "#FFF";
+        } else {
+            if (currentBgm) currentBgm.pause();
+            btn.innerText = "[ 🎵 BGM: OFF ]";
+            btn.style.color = "var(--vhs-gray)";
+        }
+    }
+    // ----------------------
 
     const questions = [
         "看到舊式的錄影帶或制服，會不自覺陷入對她們的思念。",
@@ -260,69 +318,58 @@
         "感覺生活的某一部分，已經永遠停留在等待她們出現的那個冬天。"
     ];
 
-    // 1. 開場淡出，顯示開始按鈕
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            introScreen.classList.add('hidden');
-            setTimeout(() => { 
-                introScreen.style.display = 'none'; 
-                document.getElementById('main-content').classList.add('show');
-            }, 1500); 
-        }, 2000); 
+    // 1. 點擊開場畫面 -> 解鎖自動播放限制 -> 播放 Start BGM
+    introScreen.addEventListener('click', () => {
+        introScreen.classList.add('hidden');
+        switchBgm(document.getElementById('bgm-start')); // 放第一首歌
+        
+        setTimeout(() => { 
+            introScreen.style.display = 'none'; 
+            document.getElementById('main-content').classList.add('show');
+        }, 1000); 
     });
 
-// 2. 點擊開始測驗 -> 播放影片
+    // 2. 點擊開始測驗 -> 暫停 BGM -> 看影片
     document.getElementById('btn-start').addEventListener('click', () => {
+        playClickSound();
         startView.style.display = 'none';
         videoView.style.display = 'block';
         
-        // 影片開始播放
+        if (currentBgm) currentBgm.pause(); // 影片期間保持安靜
         introVideo.play().catch(e => console.log("Video Autoplay Blocked:", e));
-        
-        // 先讓背景音樂「靜音偷播」以騙過瀏覽器
-        bgm.volume = 0; 
-        bgm.play().catch(e => console.log("BGM Pre-play Blocked"));
     });
 
-    // 3. 影片播完 (或按跳過) -> 進入測驗
+    // 3. 進入測驗 -> 白光閃爍 -> 播放 Quiz BGM (Ditto)
     function enterQuiz() {
-        flashOverlay.classList.add('flash-anim'); // 畫面閃爍白光
-        
-        // 🌟 關鍵修復：拉回開頭、音量全開，並且「確實按下播放鍵」！
-        bgm.currentTime = 0; 
-        bgm.volume = 1.0; 
-        bgm.play().catch(e => console.log("BGM Play Blocked")); // 👈 我上次就是漏了這句！！！
+        flashOverlay.classList.add('flash-anim'); 
+        switchBgm(document.getElementById('bgm-quiz')); // 切換成 Ditto 音樂
         
         setTimeout(() => {
             videoView.style.display = 'none';
             quizView.style.display = 'block';
-            renderQuestion(); // 渲染第一題
+            renderQuestion(); 
         }, 200); 
         
         setTimeout(() => flashOverlay.classList.remove('flash-anim'), 600);
     }
 
-    // 3A. 影片自然播完時 -> 進入測驗
     introVideo.addEventListener('ended', enterQuiz);
-
-    // 3B. 點擊「快轉跳過」按鈕時 -> 暫停影片，直接進入測驗
     document.getElementById('btn-skip-video').addEventListener('click', () => {
-        introVideo.pause(); // 暫停影片，以免背景繼續出聲音
-        enterQuiz(); // 直接觸發過場動畫
+        playClickSound();
+        introVideo.pause(); 
+        enterQuiz(); 
     });
 
-    // 渲染題目函數
     function renderQuestion() {
-        // 重置動畫，製造切換頻道的感覺
         quizView.style.animation = 'none';
-        quizView.offsetHeight; /* 觸發 Reflow */
+        quizView.offsetHeight; 
         quizView.style.animation = null;
 
         document.getElementById('q-counter').innerText = `Q_${String(currentQuestionIndex + 1).padStart(2, '0')} / 10`;
         document.getElementById('question-text').innerText = questions[currentQuestionIndex];
         
         const optionsContainer = document.getElementById('options-container');
-        optionsContainer.innerHTML = ''; // 清空選項
+        optionsContainer.innerHTML = ''; 
 
         const optionLabels = ["從不", "偶爾", "經常", "總是"];
         optionLabels.forEach((label, index) => {
@@ -334,33 +381,42 @@
         });
     }
 
-// 處理作答
     function handleAnswer(score) {
-        // 🔽 1. 播放按鍵音效
-        const clickAudio = document.getElementById('click-sound');
-        clickAudio.currentTime = 0; // 時間歸零，確保連續點擊都會發出聲音
-        clickAudio.play().catch(e => console.log('Click sound blocked'));
-
-        // 2. 原本的計分與下一題邏輯
+        playClickSound(); // 每按一題都有喀噠聲
         totalScore += score;
         currentQuestionIndex++;
 
         if (currentQuestionIndex < questions.length) {
-            renderQuestion(); // 還有題目就繼續渲染
+            renderQuestion(); 
         } else {
-            showFinalGlitch(); // 沒題目了，播放結尾故障動畫
+            showWaitAnimation(); // 題目做完，進入等待動畫
         }
     }
 
-    // 4. 結尾故障動畫與結果計算
-    function showFinalGlitch() {
+    // 4. 新增：播放送出答案的等待動畫
+    function showWaitAnimation() {
         quizView.style.display = 'none';
+        waitView.style.display = 'block';
+        if (currentBgm) currentBgm.pause(); // 等待期間可以暫停音樂製造緊張感
         
+        waitVideo.play().catch(e => {
+            // 如果影片壞了，3秒後自動進入故障畫面
+            setTimeout(showFinalGlitch, 3000); 
+        });
+
+        // 動畫播完後，觸發原本的兔子 Glitch 畫面
+        waitVideo.onended = () => {
+            waitView.style.display = 'none';
+            showFinalGlitch();
+        };
+    }
+
+    // 5. 故障畫面與結果判定
+    function showFinalGlitch() {
         const transitionScreen = document.getElementById('transition-screen');
         const staticAudio = document.getElementById('static-sound');
         const vcrStatus = document.getElementById('vcr-status');
         const bunnyGlitch = document.getElementById('bunny-glitch');
-        const resultBox = document.getElementById('result-box');
         
         transitionScreen.style.display = 'flex';
         staticAudio.play().catch(e => console.log('Audio blocked'));
@@ -377,15 +433,15 @@
             setTimeout(() => {
                 transitionScreen.style.display = 'none';
                 staticAudio.pause(); staticAudio.currentTime = 0;
-                resultView.style.display = 'block'; // 顯示結果容器
+                resultView.style.display = 'block'; 
                 
                 let result = {};
                 if (totalScore <= 8) {
-                    result = { status: "STATUS: STABLE", desc: "你的思緒依然清晰。這是一份健康且理性的欣賞，請將這份美好妥善收藏。", color: "#a8d8ea" };
+                    result = { status: "STATUS: STABLE", desc: "你的思緒依然清晰。這是一份健康且理性的欣賞，請將這份美好妥善收藏。", color: "#a8d8ea", bgmId: "bgm-res-stable" };
                 } else if (totalScore <= 18) {
-                    result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9" };
+                    result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9", bgmId: "bgm-res-nostalgic" };
                 } else {
-                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d" };
+                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d", bgmId: "bgm-res-lost" };
                 }
 
                 const title = document.getElementById('result-title');
@@ -393,6 +449,10 @@
                 title.style.color = result.color;
                 document.getElementById('result-score').innerText = totalScore;
                 document.getElementById('result-desc').innerText = result.desc;
+                
+                // 播下結果專屬的 BGM
+                switchBgm(document.getElementById(result.bgmId));
+
             }, 100); 
 
             setTimeout(() => {
@@ -405,15 +465,35 @@
         }, 3000);
     }
 
-    // 🎵 音樂手動控制開關
-    function toggleMusic() {
-        const bgm = document.getElementById('bgm');
-        // 檢查目前是否為暫停狀態，如果是就播放，否則就暫停
-        if (bgm.paused) {
-            bgm.volume = 1.0; 
-            bgm.play().catch(e => console.log("手動播放失敗:", e));
+    // 6. 分享功能
+    function getShareText() {
+        const title = document.getElementById('result-title').innerText;
+        const score = document.getElementById('result-score').innerText;
+        return `我在「NJDI 鯨鬱症自我檢測」獲得了 [ ${title} ]！(分數: ${score}/30)\n\n來測測看你的鯨鬱指數吧：\nhttps://njditest.vercel.app/`;
+    }
+
+    function shareToThreads() {
+        playClickSound();
+        const text = encodeURIComponent(getShareText());
+        window.open(`https://www.threads.net/intent/post?text=${text}`, '_blank');
+    }
+
+    function shareResult() {
+        playClickSound();
+        const text = getShareText();
+        
+        // 如果手機瀏覽器支援原生分享選單 (包含 IG 私訊、Line等)
+        if (navigator.share) {
+            navigator.share({
+                title: 'NJDI 鯨鬱症測驗',
+                text: text,
+                url: 'https://njditest.vercel.app/'
+            }).catch(console.error);
         } else {
-            bgm.pause();
+            // 如果是電腦版，就幫他複製到剪貼簿
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✨ 測驗結果已複製到剪貼簿！可以貼到 IG 限動或傳給朋友囉！");
+            });
         }
     }
 </script>
