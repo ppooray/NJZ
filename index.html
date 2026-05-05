@@ -167,6 +167,9 @@
 <audio id="bgm" loop><source src="ditto-bgm.mp3" type="audio/mpeg"></audio>
 <audio id="static-sound"><source src="tv-static.mp3" type="audio/mpeg"></audio>
 <audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
+
+<button id="music-control" onclick="toggleMusic()">[ 🎵 BGM: ON / OFF ]</button>
+    
 <div class="window" id="main-content">
     <div class="window-content">
         
@@ -255,25 +258,29 @@
     document.getElementById('btn-start').addEventListener('click', () => {
         startView.style.display = 'none';
         videoView.style.display = 'block';
+        
+        // 影片開始播放
         introVideo.play().catch(e => console.log("Video Autoplay Blocked:", e));
-        // ❌ 把 bgm.volume 和 bgm.play() 這兩行刪掉或註解掉！
+        
+        // 先讓背景音樂「靜音偷播」以騙過瀏覽器
+        bgm.volume = 0; 
+        bgm.play().catch(e => console.log("BGM Pre-play Blocked"));
     });
 
-// === 更新後的切換測驗邏輯 ===
-
-// 3. 影片播完 -> 白光過場 -> 顯示第一題
+    // 3. 影片播完 (或按跳過) -> 進入測驗
     function enterQuiz() {
         flashOverlay.classList.add('flash-anim'); // 畫面閃爍白光
         
-        // ✅ 在這裡讓背景音樂響起！(確保白光閃現時音樂跟著下)
-        bgm.volume = 1.0; // 你可以自己調音量 0.1 ~ 1.0
-        bgm.play().catch(e => console.log("BGM Blocked"));
+        // 🌟 關鍵修復：拉回開頭、音量全開，並且「確實按下播放鍵」！
+        bgm.currentTime = 0; 
+        bgm.volume = 1.0; 
+        bgm.play().catch(e => console.log("BGM Play Blocked")); // 👈 我上次就是漏了這句！！！
         
         setTimeout(() => {
             videoView.style.display = 'none';
             quizView.style.display = 'block';
             renderQuestion(); // 渲染第一題
-        }, 200); // 趁白光最亮時切換畫面
+        }, 200); 
         
         setTimeout(() => flashOverlay.classList.remove('flash-anim'), 600);
     }
