@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NJDI 鯨鬱症量表</title>
+    <!-- 引入字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nj-blue: #B1D8F4;
+            --nj-pink: #FFD1DC;
+            --nj-white: #F0F8FF;
+            --border-style: 4px solid #000;
+        }
+
+        body {
+            background-color: var(--nj-blue);
+            /* 網格背景增加 Y2K 復古感 */
+            background-image: linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: 'Noto Sans TC', sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            background: var(--nj-white);
+            max-width: 600px;
+            width: 100%;
+            border: var(--border-style);
+            box-shadow: 10px 10px 0px #000;
+            padding: 30px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            color: #000;
+            text-shadow: 2px 2px 0px var(--nj-pink);
+        }
+
+        .subtitle {
+            text-align: center;
+            background: #000;
+            color: #fff;
+            padding: 5px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            background: #fff;
+            border: 2px solid #000;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .options label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            border: var(--border-style);
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--nj-blue);
+            color: #000;
+            transform: translate(-3px, -3px);
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        /* 結果區塊隱藏 */
+        #result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: var(--border-style);
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn { 
+            0% { transform: scale(0.8); opacity: 0; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>NJDI Test</h1>
+    <p class="subtitle">鯨鬱症自我檢測量表 (Clinical Version)</p>
+
+    <!-- 測驗表單 -->
+    <form id="njdi-form">
+        <!-- 這裡用 JS 動態生成題目，保持 HTML 乾淨 -->
+        <div id="questions-container"></div>
+        <button type="submit">生成診斷報告</button>
+    </form>
+
+    <!-- 診斷結果 -->
+    <div id="result-box">
+        <h2 id="result-title"></h2>
+        <p>你的總分：<strong id="result-score"></strong> / 30</p>
+        <p id="result-desc"></p>
+        <button type="button" onclick="location.reload()">重新測驗</button>
+    </div>
+</div>
+
+<script>
+    // 題目清單
+    const questions = [
+        "每次看到藍色的東西，大腦會自動聯想到 NewJeans。",
+        "當官方超過三天沒更新時，會感到明顯的寂寞與心慌。",
+        "看到兔子、貓、或麵包時，會不由自主地聯想到成員。",
+        "腦中經常自動播放《Ditto》或《OMG》的旋律，揮之不去。",
+        "願意為了購買周邊或訂閱 Phoning 而壓縮生活開支。",
+        "社交平台上 80% 以上的推播內容都與她們相關。",
+        "日常說話會不自覺帶入成員的語氣（如：Hehe, OMG）。",
+        "看到 Y2K 風格的穿搭會產生極強的購買衝動。",
+        "對於成員的成長（如 Hyein 變高）感到老母親/老父親般的欣慰。",
+        "生活唯一的重心就是等待下一次回歸（Comeback）。"
+    ];
+
+    const container = document.getElementById('questions-container');
+
+    // 動態生成 HTML 題目
+    questions.forEach((q, index) => {
+        const block = document.createElement('div');
+        block.className = 'question-block';
+        block.innerHTML = `
+            <span class="question-text">${index + 1}. ${q}</span>
+            <div class="options">
+                <label><input type="radio" name="q${index}" value="0" required> 從不</label>
+                <label><input type="radio" name="q${index}" value="1"> 偶爾</label>
+                <label><input type="radio" name="q${index}" value="2"> 經常</label>
+                <label><input type="radio" name="q${index}" value="3"> 總是</label>
+            </div>
+        `;
+        container.appendChild(block);
+    });
+
+    // 處理表單提交
+    document.getElementById('njdi-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // 防止網頁重新整理
+        
+        let score = 0;
+        const formData = new FormData(this);
+        for (let value of formData.values()) {
+            score += parseInt(value);
+        }
+
+        // 判斷邏輯
+        let result = {};
+        if (score <= 8) {
+            result = { status: "【隱性 Bunnies】", desc: "你是一隻健康的小兔子，目前處於理性欣賞階段。", bg: "#d1fae5" };
+        } else if (score <= 18) {
+            result = { status: "【中度鯨鬱】", desc: "你已經深陷兔子洞，建議每天聽三遍《Attention》來穩定心率。", bg: "#fef3c7" };
+        } else {
+            result = { status: "【鯨鬱症末期】", desc: "已無藥可醫。建議直接搬到 ADOR 公司門口實習，你就是第六位成員。", bg: "#fee2e2" };
+        }
+
+        // 隱藏表單，顯示結果
+        this.style.display = 'none';
+        const resultBox = document.getElementById('result-box');
+        resultBox.style.display = 'block';
+        resultBox.style.backgroundColor = result.bg;
+        document.getElementById('result-title').innerText = result.status;
+        document.getElementById('result-score').innerText = score;
+        document.getElementById('result-desc').innerText = result.desc;
+        
+        // 畫面自動滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script>
+
+</body>
+</html>
