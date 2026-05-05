@@ -3,199 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJDI 鯨鬱症量表 - Phoning OS</title>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>NJDI 鯨鬱症量表 - Attention!</title>
+    <!-- 引入多種字體來模擬 Attention Logo 的拼貼感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Pacifico&family=Press+Start+2P&family=VT323&family=Noto+Sans+TC:wght@400;700&family=Helvetica&display=swap" rel="stylesheet">
     <style>
+        /* 定義 Bluebook 時期的核心色彩 */
         :root {
-            --nj-blue: #B1D8F4;
-            --nj-pink: #FFB3C6;
-            --window-bg: #EAEAEA;
-            --border-dark: #000;
-            --border-light: #FFF;
+            --bg-blue: #3CB4F6; /* 參考圖片底色 */
+            --nj-lime: #A3FF22; /* Attention 的萊姆綠 */
+            --nj-white: #FFFFFF;
+            --box-border: 4px solid #000;
         }
 
         body {
-            /* 復古藍色網格背景 */
-            background-color: var(--nj-blue);
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.4) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.4) 2px, transparent 2px);
-            background-size: 30px 30px;
-            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-blue);
+            font-family: 'Noto Sans TC', 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            overflow-x: hidden; /* 防止飛天小女警飛出視窗產生捲軸 */
+            position: relative;
         }
 
-        /* 復古視窗主體 */
-        .window {
-            background: var(--window-bg);
-            width: 100%;
-            max-width: 650px;
-            border: 3px solid var(--border-dark);
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 視窗標題列 */
-        .title-bar {
-            background: var(--border-dark);
-            color: #FFF;
-            padding: 8px 12px;
-            font-family: 'DotGothic16', sans-serif;
-            font-size: 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .title-controls span {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            background: #FFF;
-            border: 2px solid #000;
-            margin-left: 5px;
+        /* 背景音樂控制按鈕 */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--nj-white);
+            border: var(--box-border);
+            padding: 10px 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
             cursor: pointer;
+            z-index: 100;
+            border-radius: 50px;
+            box-shadow: 4px 4px 0px #000;
+            transition: 0.2s;
         }
 
-        /* 跑馬燈 */
-        .marquee-container {
-            background: var(--nj-pink);
-            color: #000;
-            border-bottom: 3px solid #000;
-            font-family: 'DotGothic16', sans-serif;
-            font-weight: bold;
-            padding: 5px 0;
+        #music-control:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        /* 飛天小女警動畫區塊 */
+        .flyer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 讓點擊可以穿透圖片按到後面的題目 */
+            z-index: 0;
+        }
+
+        .flyer {
+            position: absolute;
+            width: 80px; /* 圖片大小，你可以自訂 */
+            opacity: 0.8;
+            animation: floatAround linear infinite;
+        }
+
+        /* 給五位成員不同的飛行軌跡和速度 */
+        .flyer:nth-child(1) { top: 10%; left: -10%; animation-duration: 25s; animation-name: flyRight; }
+        .flyer:nth-child(2) { top: 60%; right: -10%; animation-duration: 30s; animation-name: flyLeft; }
+        .flyer:nth-child(3) { bottom: 10%; left: -10%; animation-duration: 22s; animation-name: flyRightWave; }
+        .flyer:nth-child(4) { top: 30%; right: -10%; animation-duration: 28s; animation-name: flyLeftWave; }
+        .flyer:nth-child(5) { top: 80%; left: 20%; animation-duration: 35s; animation-name: floatUp; }
+
+        @keyframes flyRight { 0% { transform: translate(0vw, 0) rotate(0deg); } 100% { transform: translate(120vw, 100px) rotate(15deg); } }
+        @keyframes flyLeft { 0% { transform: translate(0vw, 0) rotate(0deg); } 100% { transform: translate(-120vw, -50px) rotate(-15deg); } }
+        @keyframes flyRightWave { 0% { transform: translate(0vw, 0) rotate(-10deg); } 50% { transform: translate(50vw, -100px) rotate(10deg); } 100% { transform: translate(120vw, 0) rotate(-10deg); } }
+        @keyframes flyLeftWave { 0% { transform: translate(0vw, 0) rotate(10deg); } 50% { transform: translate(-50vw, 150px) rotate(-10deg); } 100% { transform: translate(-120vw, 0) rotate(10deg); } }
+        @keyframes floatUp { 0% { transform: translate(0, 120vh) rotate(0deg); } 100% { transform: translate(50px, -120vh) rotate(20deg); } }
+
+
+        /* 測驗主體區塊 */
+        .main-container {
+            background: var(--nj-white);
+            border: var(--box-border);
+            box-shadow: 12px 12px 0px #000;
+            border-radius: 20px; /* 圓角更符合 Bluebook 風格 */
+            max-width: 650px;
+            width: 100%;
+            padding: 30px;
+            position: relative;
+            z-index: 10; /* 確保在飛天小女警之上 */
+        }
+
+        /* 拼貼風標題設計 */
+        h1.mixed-title {
+            text-align: center;
+            font-size: 3.5rem;
+            margin: 0 0 10px 0;
             letter-spacing: 2px;
+            color: var(--nj-lime);
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
         }
 
-        .window-content {
-            padding: 25px;
-            background: #FFF;
+        /* 根據你提供的圖片，將每個字母套用不同字體 */
+        h1.mixed-title span:nth-child(1) { font-family: 'Chewy', cursive; } /* 泡泡體 */
+        h1.mixed-title span:nth-child(2) { font-family: 'Press Start 2P', cursive; font-size: 2.2rem; } /* 像素體 */
+        h1.mixed-title span:nth-child(3) { font-family: 'Pacifico', cursive; } /* 手寫體 */
+        h1.mixed-title span:nth-child(4) { font-family: 'VT323', monospace; font-size: 3.8rem;} /* 窄版像素 */
+        h1.mixed-title span:nth-child(5) { font-family: 'Helvetica', sans-serif; font-weight: bold; font-style: italic;} /* 無襯線 */
+        
+        .subtitle {
+            text-align: center;
+            background: var(--nj-lime);
+            border: 3px solid #000;
+            border-radius: 50px;
+            padding: 5px 15px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 auto 30px auto;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-        /* 題目區塊設計 */
+        /* 題目區塊 */
         .question-block {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding: 15px;
-            background: var(--window-bg);
-            border-top: 3px solid var(--border-light);
-            border-left: 3px solid var(--border-light);
-            border-bottom: 3px solid #999;
-            border-right: 3px solid #999;
+            background: #F8F8F8;
+            border: 3px solid #000;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+
+        .question-block:hover {
+            background: #E8F6FF;
+            transform: translateX(5px);
         }
 
         .question-text {
             font-weight: 700;
-            display: block;
+            font-size: 1.1rem;
             margin-bottom: 12px;
-            color: #222;
+            display: block;
         }
 
         .options {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 8px;
         }
 
         .options label {
             background: #FFF;
             border: 2px solid #000;
-            padding: 5px 10px;
+            border-radius: 30px;
+            padding: 8px 15px;
             cursor: pointer;
             font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: 0.1s;
-        }
-
-        .options label:hover {
-            background: var(--nj-pink);
-        }
-
-        /* 復古按鈕 */
-        button {
-            width: 100%;
-            background: #C0C0C0;
-            color: #000;
-            border-top: 3px solid #FFF;
-            border-left: 3px solid #FFF;
-            border-bottom: 3px solid #000;
-            border-right: 3px solid #000;
-            padding: 15px;
-            font-size: 1.2rem;
             font-weight: bold;
-            font-family: 'DotGothic16', sans-serif;
+            transition: 0.2s;
+        }
+
+        /* 隱藏原生 radio 按鈕 */
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        /* 被選中時的樣式 */
+        .options input[type="radio"]:checked + span {
+            background: var(--nj-lime);
+            color: #000;
+        }
+        
+        .options span {
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+        }
+
+
+        button[type="submit"], .btn-action {
+            width: 100%;
+            background: var(--nj-lime);
+            color: #000;
+            border: 4px solid #000;
+            border-radius: 50px;
+            padding: 15px;
+            font-size: 1.5rem;
+            font-family: 'Chewy', cursive;
             cursor: pointer;
             margin-top: 20px;
-            letter-spacing: 2px;
+            transition: 0.2s;
+            text-shadow: 1px 1px 0px #FFF;
         }
 
-        button:active {
-            border-top: 3px solid #000;
-            border-left: 3px solid #000;
-            border-bottom: 3px solid #FFF;
-            border-right: 3px solid #FFF;
-            background: #A0A0A0;
+        button[type="submit"]:hover, .btn-action:hover {
+            background: #FFF;
+            transform: translateY(-3px);
+            box-shadow: 0px 5px 0px #000;
         }
 
         /* 結果區塊 */
         #result-box {
             display: none;
             text-align: center;
-            padding: 20px;
-            border: 3px dashed #000;
-            background: var(--nj-blue);
+            padding: 30px;
+            border: 4px solid #000;
+            border-radius: 20px;
+            background: var(--nj-white);
             margin-top: 20px;
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         #result-title {
-            font-family: 'DotGothic16', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-family: 'Chewy', cursive;
+            font-size: 2.5rem;
+            margin: 10px 0;
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
 
-<div class="window">
-    <!-- 視窗標題列 -->
-    <div class="title-bar">
-        <span>🐰 Phoning.exe - NJDI Clinical Test</span>
-        <div class="title-controls">
-            <span></span>
-            <span></span>
-            <span style="background: var(--nj-pink);"></span>
-        </div>
-    </div>
-    
-    <!-- 復古跑馬燈 -->
-    <div class="marquee-container">
-        <marquee scrollamount="5">⚠️ 警告：本測驗無法取代專業醫療建議。如果您發現體液變成了藍色，請立即尋求 Bunnies 支援。 ⚠️</marquee>
-    </div>
+<!-- 背景音樂音檔 (請把 src 換成你的 mp3 檔案路徑) -->
+<audio id="bgm" loop>
+    <!-- 你可以放 Ditto 或 Super Shy 的伴奏版 -->
+    <source src="your-music-file.mp3" type="audio/mpeg">
+</audio>
 
-    <div class="window-content">
-        <form id="njdi-form">
-            <div id="questions-container"></div>
-            <button type="submit">開始診斷 [ ENTER ]</button>
-        </form>
+<!-- 音樂控制鈕 -->
+<button id="music-control" onclick="toggleMusic()">🎵 Play BGM</button>
 
-        <div id="result-box">
-            <h2 id="result-title"></h2>
-            <p style="font-size: 1.2rem;">診斷分數：<strong id="result-score" style="font-size: 1.5rem;"></strong> / 30</p>
-            <p id="result-desc" style="font-weight: bold; margin-top: 15px; line-height: 1.6;"></p>
-            <button type="button" onclick="location.reload()">重新執行程式 [ F5 ]</button>
-        </div>
+<!-- 飛天小女警動畫區塊 (請把 src 換成你抓下來的去背 PNG) -->
+<div class="flyer-container">
+    <!-- 這裡我先用色塊代替，到時候直接把 src 換成成員的圖 -->
+    <img class="flyer" src="https://via.placeholder.com/80/FFB3C6/000000?text=Minji" alt="Minji">
+    <img class="flyer" src="https://via.placeholder.com/80/B1D8F4/000000?text=Hanni" alt="Hanni">
+    <img class="flyer" src="https://via.placeholder.com/80/FFFFA6/000000?text=Dani" alt="Danielle">
+    <img class="flyer" src="https://via.placeholder.com/80/B4F8C8/000000?text=Haerin" alt="Haerin">
+    <img class="flyer" src="https://via.placeholder.com/80/E5B3FE/000000?text=Hyein" alt="Hyein">
+</div>
+
+<div class="main-container">
+    <!-- 拼貼風標題：每個 span 套用不同字體 -->
+    <h1 class="mixed-title">
+        <span>N</span><span>J</span><span>D</span><span>I</span> <span>Test</span>
+    </h1>
+    <div class="subtitle">鯨鬱症自我檢測量表</div>
+
+    <form id="njdi-form">
+        <div id="questions-container"></div>
+        <button type="submit">確認診斷結果！</button>
+    </form>
+
+    <div id="result-box">
+        <h2 id="result-title"></h2>
+        <p style="font-size: 1.2rem;">診斷分數：<strong id="result-score" style="font-size: 1.8rem; color: var(--bg-blue);"></strong> / 30</p>
+        <p id="result-desc" style="font-weight: bold; margin-top: 15px; line-height: 1.6;"></p>
+        <button type="button" class="btn-action" onclick="location.reload()">再測一次 🐰</button>
     </div>
 </div>
 
 <script>
+    // 音樂控制邏輯
+    const bgm = document.getElementById('bgm');
+    const musicBtn = document.getElementById('music-control');
+    let isPlaying = false;
+
+    function toggleMusic() {
+        if (isPlaying) {
+            bgm.pause();
+            musicBtn.innerText = "🎵 Play BGM";
+        } else {
+            bgm.play();
+            musicBtn.innerText = "⏸️ Pause BGM";
+        }
+        isPlaying = !isPlaying;
+    }
+
+    // 題目資料
     const questions = [
         "每次看到藍色的東西，大腦會自動聯想到 NewJeans。",
         "當官方超過三天沒更新時，會感到明顯的寂寞與心慌。",
@@ -205,7 +298,7 @@
         "社交平台上 80% 以上的推播內容都與她們相關。",
         "日常說話會不自覺帶入成員的語氣（如：Hehe, OMG）。",
         "看到 Y2K 風格的穿搭會產生極強的購買衝動。",
-        "對於成員的成長（如 Hyein 變高）感到老母親/老父親般的欣慰。",
+        "對於成員的成長感到老母親/老父親般的欣慰。",
         "生活唯一的重心就是等待下一次回歸（Comeback）。"
     ];
 
@@ -217,15 +310,16 @@
         block.innerHTML = `
             <span class="question-text">Q${index + 1}. ${q}</span>
             <div class="options">
-                <label><input type="radio" name="q${index}" value="0" required> 從不</label>
-                <label><input type="radio" name="q${index}" value="1"> 偶爾</label>
-                <label><input type="radio" name="q${index}" value="2"> 經常</label>
-                <label><input type="radio" name="q${index}" value="3"> 總是</label>
+                <label><input type="radio" name="q${index}" value="0" required><span>從不</span></label>
+                <label><input type="radio" name="q${index}" value="1"><span>偶爾</span></label>
+                <label><input type="radio" name="q${index}" value="2"><span>經常</span></label>
+                <label><input type="radio" name="q${index}" value="3"><span>總是</span></label>
             </div>
         `;
         container.appendChild(block);
     });
 
+    // 提交邏輯
     document.getElementById('njdi-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -237,18 +331,22 @@
 
         let result = {};
         if (score <= 8) {
-            result = { status: "【健康小兔子】", desc: "系統判定：狀態穩定。目前處於理性欣賞階段，請繼續保持。", bg: "#d1fae5" };
+            result = { status: "健康小兔子", desc: "狀態穩定！目前處於理性欣賞階段，請繼續保持這份熱愛。", color: "#A3FF22" };
         } else if (score <= 18) {
-            result = { status: "【輕/中度鯨鬱】", desc: "系統判定：出現依賴症狀。建議每天聽三遍《Attention》並補充兔子維他命來穩定心率。", bg: "#fef3c7" };
+            result = { status: "輕中度鯨鬱", desc: "出現依賴症狀！建議每天聽三遍《Attention》並補充兔子維他命來穩定心率。", color: "#FFFFA6" };
         } else {
-            result = { status: "【鯨鬱症末期】", desc: "系統崩潰 ⚠️：已無藥可醫。建議直接搬到 ADOR 公司門口實習，你就是第六位成員。", bg: "var(--nj-pink)" };
+            result = { status: "鯨鬱症末期", desc: "已無藥可醫 ⚠️ 建議直接搬到 ADOR 公司門口實習，你就是第六位成員！", color: "#FFB3C6" };
         }
 
         this.style.display = 'none';
         const resultBox = document.getElementById('result-box');
+        const rTitle = document.getElementById('result-title');
+        
         resultBox.style.display = 'block';
-        resultBox.style.backgroundColor = result.bg;
-        document.getElementById('result-title').innerText = result.status;
+        rTitle.innerText = result.status;
+        rTitle.style.color = result.color;
+        rTitle.style.WebkitTextStroke = "2px black"; // 加強文字的塗鴉感
+        
         document.getElementById('result-score').innerText = score;
         document.getElementById('result-desc').innerText = result.desc;
         
