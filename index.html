@@ -166,7 +166,7 @@
 
 <audio id="bgm" loop><source src="ditto-bgm.mp3" type="audio/mpeg"></audio>
 <audio id="static-sound"><source src="tv-static.mp3" type="audio/mpeg"></audio>
-
+<audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
 <div class="window" id="main-content">
     <div class="window-content">
         
@@ -309,8 +309,14 @@
         });
     }
 
-    // 處理作答
+// 處理作答
     function handleAnswer(score) {
+        // 🔽 1. 播放按鍵音效
+        const clickAudio = document.getElementById('click-sound');
+        clickAudio.currentTime = 0; // 時間歸零，確保連續點擊都會發出聲音
+        clickAudio.play().catch(e => console.log('Click sound blocked'));
+
+        // 2. 原本的計分與下一題邏輯
         totalScore += score;
         currentQuestionIndex++;
 
