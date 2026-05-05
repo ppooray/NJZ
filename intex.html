@@ -3,151 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJDI 鯨鬱症量表</title>
-    <!-- 引入字體 -->
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>NJDI 鯨鬱症量表 - Phoning OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --nj-blue: #B1D8F4;
-            --nj-pink: #FFD1DC;
-            --nj-white: #F0F8FF;
-            --border-style: 4px solid #000;
+            --nj-pink: #FFB3C6;
+            --window-bg: #EAEAEA;
+            --border-dark: #000;
+            --border-light: #FFF;
         }
 
         body {
+            /* 復古藍色網格背景 */
             background-color: var(--nj-blue);
-            /* 網格背景增加 Y2K 復古感 */
-            background-image: linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.4) 2px, transparent 2px);
+            background-size: 30px 30px;
             font-family: 'Noto Sans TC', sans-serif;
             display: flex;
             justify-content: center;
-            padding: 40px 20px;
-            color: #333;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
 
-        .container {
-            background: var(--nj-white);
-            max-width: 600px;
+        /* 復古視窗主體 */
+        .window {
+            background: var(--window-bg);
             width: 100%;
-            border: var(--border-style);
-            box-shadow: 10px 10px 0px #000;
-            padding: 30px;
-            border-radius: 8px;
-            position: relative;
+            max-width: 650px;
+            border: 3px solid var(--border-dark);
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
         }
 
-        h1 {
-            font-family: 'ZCOOL KuaiLe', cursive;
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-            color: #000;
-            text-shadow: 2px 2px 0px var(--nj-pink);
+        /* 視窗標題列 */
+        .title-bar {
+            background: var(--border-dark);
+            color: #FFF;
+            padding: 8px 12px;
+            font-family: 'DotGothic16', sans-serif;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .subtitle {
-            text-align: center;
-            background: #000;
-            color: #fff;
-            padding: 5px;
-            margin-bottom: 30px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .question-block {
-            margin-bottom: 25px;
-            background: #fff;
+        .title-controls span {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background: #FFF;
             border: 2px solid #000;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        /* 跑馬燈 */
+        .marquee-container {
+            background: var(--nj-pink);
+            color: #000;
+            border-bottom: 3px solid #000;
+            font-family: 'DotGothic16', sans-serif;
+            font-weight: bold;
+            padding: 5px 0;
+            letter-spacing: 2px;
+        }
+
+        .window-content {
+            padding: 25px;
+            background: #FFF;
+        }
+
+        /* 題目區塊設計 */
+        .question-block {
+            margin-bottom: 20px;
             padding: 15px;
-            border-radius: 5px;
-            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+            background: var(--window-bg);
+            border-top: 3px solid var(--border-light);
+            border-left: 3px solid var(--border-light);
+            border-bottom: 3px solid #999;
+            border-right: 3px solid #999;
         }
 
         .question-text {
-            font-weight: bold;
-            margin-bottom: 12px;
+            font-weight: 700;
             display: block;
-            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #222;
         }
 
         .options {
             display: flex;
-            justify-content: space-between;
-            gap: 5px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .options label {
+            background: #FFF;
+            border: 2px solid #000;
+            padding: 5px 10px;
             cursor: pointer;
             font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 5px;
+            transition: 0.1s;
         }
 
+        .options label:hover {
+            background: var(--nj-pink);
+        }
+
+        /* 復古按鈕 */
         button {
             width: 100%;
-            background: #000;
-            color: #fff;
-            border: var(--border-style);
+            background: #C0C0C0;
+            color: #000;
+            border-top: 3px solid #FFF;
+            border-left: 3px solid #FFF;
+            border-bottom: 3px solid #000;
+            border-right: 3px solid #000;
             padding: 15px;
             font-size: 1.2rem;
             font-weight: bold;
+            font-family: 'DotGothic16', sans-serif;
             cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.2s ease;
+            margin-top: 20px;
+            letter-spacing: 2px;
         }
 
-        button:hover {
-            background: var(--nj-blue);
-            color: #000;
-            transform: translate(-3px, -3px);
-            box-shadow: 6px 6px 0px #000;
+        button:active {
+            border-top: 3px solid #000;
+            border-left: 3px solid #000;
+            border-bottom: 3px solid #FFF;
+            border-right: 3px solid #FFF;
+            background: #A0A0A0;
         }
 
-        /* 結果區塊隱藏 */
+        /* 結果區塊 */
         #result-box {
             display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border: var(--border-style);
             text-align: center;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 20px;
+            border: 3px dashed #000;
+            background: var(--nj-blue);
+            margin-top: 20px;
         }
 
-        @keyframes popIn { 
-            0% { transform: scale(0.8); opacity: 0; } 
-            100% { transform: scale(1); opacity: 1; } 
+        #result-title {
+            font-family: 'DotGothic16', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>NJDI Test</h1>
-    <p class="subtitle">鯨鬱症自我檢測量表 (Clinical Version)</p>
+<div class="window">
+    <!-- 視窗標題列 -->
+    <div class="title-bar">
+        <span>🐰 Phoning.exe - NJDI Clinical Test</span>
+        <div class="title-controls">
+            <span></span>
+            <span></span>
+            <span style="background: var(--nj-pink);"></span>
+        </div>
+    </div>
+    
+    <!-- 復古跑馬燈 -->
+    <div class="marquee-container">
+        <marquee scrollamount="5">⚠️ 警告：本測驗無法取代專業醫療建議。如果您發現體液變成了藍色，請立即尋求 Bunnies 支援。 ⚠️</marquee>
+    </div>
 
-    <!-- 測驗表單 -->
-    <form id="njdi-form">
-        <!-- 這裡用 JS 動態生成題目，保持 HTML 乾淨 -->
-        <div id="questions-container"></div>
-        <button type="submit">生成診斷報告</button>
-    </form>
+    <div class="window-content">
+        <form id="njdi-form">
+            <div id="questions-container"></div>
+            <button type="submit">開始診斷 [ ENTER ]</button>
+        </form>
 
-    <!-- 診斷結果 -->
-    <div id="result-box">
-        <h2 id="result-title"></h2>
-        <p>你的總分：<strong id="result-score"></strong> / 30</p>
-        <p id="result-desc"></p>
-        <button type="button" onclick="location.reload()">重新測驗</button>
+        <div id="result-box">
+            <h2 id="result-title"></h2>
+            <p style="font-size: 1.2rem;">診斷分數：<strong id="result-score" style="font-size: 1.5rem;"></strong> / 30</p>
+            <p id="result-desc" style="font-weight: bold; margin-top: 15px; line-height: 1.6;"></p>
+            <button type="button" onclick="location.reload()">重新執行程式 [ F5 ]</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 題目清單
     const questions = [
         "每次看到藍色的東西，大腦會自動聯想到 NewJeans。",
         "當官方超過三天沒更新時，會感到明顯的寂寞與心慌。",
@@ -163,12 +211,11 @@
 
     const container = document.getElementById('questions-container');
 
-    // 動態生成 HTML 題目
     questions.forEach((q, index) => {
         const block = document.createElement('div');
         block.className = 'question-block';
         block.innerHTML = `
-            <span class="question-text">${index + 1}. ${q}</span>
+            <span class="question-text">Q${index + 1}. ${q}</span>
             <div class="options">
                 <label><input type="radio" name="q${index}" value="0" required> 從不</label>
                 <label><input type="radio" name="q${index}" value="1"> 偶爾</label>
@@ -179,9 +226,8 @@
         container.appendChild(block);
     });
 
-    // 處理表單提交
     document.getElementById('njdi-form').addEventListener('submit', function(e) {
-        e.preventDefault(); // 防止網頁重新整理
+        e.preventDefault();
         
         let score = 0;
         const formData = new FormData(this);
@@ -189,17 +235,15 @@
             score += parseInt(value);
         }
 
-        // 判斷邏輯
         let result = {};
         if (score <= 8) {
-            result = { status: "【隱性 Bunnies】", desc: "你是一隻健康的小兔子，目前處於理性欣賞階段。", bg: "#d1fae5" };
+            result = { status: "【健康小兔子】", desc: "系統判定：狀態穩定。目前處於理性欣賞階段，請繼續保持。", bg: "#d1fae5" };
         } else if (score <= 18) {
-            result = { status: "【中度鯨鬱】", desc: "你已經深陷兔子洞，建議每天聽三遍《Attention》來穩定心率。", bg: "#fef3c7" };
+            result = { status: "【輕/中度鯨鬱】", desc: "系統判定：出現依賴症狀。建議每天聽三遍《Attention》並補充兔子維他命來穩定心率。", bg: "#fef3c7" };
         } else {
-            result = { status: "【鯨鬱症末期】", desc: "已無藥可醫。建議直接搬到 ADOR 公司門口實習，你就是第六位成員。", bg: "#fee2e2" };
+            result = { status: "【鯨鬱症末期】", desc: "系統崩潰 ⚠️：已無藥可醫。建議直接搬到 ADOR 公司門口實習，你就是第六位成員。", bg: "var(--nj-pink)" };
         }
 
-        // 隱藏表單，顯示結果
         this.style.display = 'none';
         const resultBox = document.getElementById('result-box');
         resultBox.style.display = 'block';
@@ -208,7 +252,6 @@
         document.getElementById('result-score').innerText = score;
         document.getElementById('result-desc').innerText = result.desc;
         
-        // 畫面自動滾動回頂部
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 </script>
