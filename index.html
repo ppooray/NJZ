@@ -139,6 +139,23 @@
             padding: 30px 20px; border: 1px solid #555; background: rgba(0,0,0,0.5); margin-bottom: 20px;
         }
         #result-title { font-family: 'VT323', monospace; font-size: 2.2rem; margin-bottom: 10px; font-weight: normal;}
+
+        /* 背景音樂按鈕固定在左下角 */
+        #music-control {
+            position: fixed; 
+            bottom: 30px; 
+            left: 30px; 
+            background: transparent;
+            color: var(--vhs-gray); 
+            border: 1px solid var(--vhs-gray); 
+            padding: 5px 10px;
+            font-family: 'VT323', monospace; 
+            font-size: 1.2rem; 
+            cursor: pointer;
+            z-index: 1000; 
+            transition: 0.3s;
+        }
+        #music-control:hover { color: #FFF; border-color: #FFF; }
     </style>
 </head>
 <body>
@@ -386,6 +403,18 @@
             }, 800);
 
         }, 3000);
+    }
+
+    // 🎵 音樂手動控制開關
+    function toggleMusic() {
+        const bgm = document.getElementById('bgm');
+        // 檢查目前是否為暫停狀態，如果是就播放，否則就暫停
+        if (bgm.paused) {
+            bgm.volume = 1.0; 
+            bgm.play().catch(e => console.log("手動播放失敗:", e));
+        } else {
+            bgm.pause();
+        }
     }
 </script>
 
