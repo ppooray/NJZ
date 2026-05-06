@@ -555,7 +555,7 @@
                 if (scoreRatio > 0.3 && gachaRoll <= 5) {
                     
                     // ✨ 歐洲人專屬：進入 SSR 資料夾隨機抽一張
-                    const totalSsrPhotos = 3; // 👈 ⚠️ 你的 ssr 資料夾裡有幾張隱藏版，這裡就填多少！
+                    const totalSsrPhotos = 12; // 👈 ⚠️ 你的 ssr 資料夾裡有幾張隱藏版，這裡就填多少！
                     const randomNum = Math.floor(Math.random() * totalSsrPhotos) + 1; 
                     finalPhotoSrc = `photos/ssr/${randomNum}.jpg`; 
                     
@@ -568,15 +568,15 @@
                     if (scoreRatio <= 0.3) {
                         // 🟢 輕度 (STABLE) - 狀態穩定 (沒有抽 SSR 的資格)
                         folderName = "stable";
-                        photoCount = 10; // 👈 stable 資料夾裡的照片數量
+                        photoCount = 12; // 👈 stable 資料夾裡的照片數量
                     } else if (scoreRatio <= 0.6) {
                         // 🟡 中度 (NOSTALGIC) - 淡淡懷舊
                         folderName = "nostalgic";
-                        photoCount = 15; // 👈 nostalgic 資料夾裡的照片數量
+                        photoCount = 25; // 👈 nostalgic 資料夾裡的照片數量
                     } else {
                         // 🔴 重度 (LOST_IN_WINTER) - 迷失在冬天
                         folderName = "lost";
-                        photoCount = 20; // 👈 lost 資料夾裡的照片數量
+                        photoCount = 39; // 👈 lost 資料夾裡的照片數量
                     }
 
                     // 系統根據剛剛決定的資料夾與總數，自動抽一張
