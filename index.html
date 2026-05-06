@@ -568,53 +568,6 @@
         }, 2500);
     }
 
-        setTimeout(() => {
-            flashOverlay.classList.add('flash-anim');
-            
-            setTimeout(() => {
-                transitionScreen.style.display = 'none';
-                staticAudio.pause(); staticAudio.currentTime = 0;
-                resultView.style.display = 'block'; 
-               
-               // 🧠 自動算出最高分 (題數 x 3分)
-                const maxScore = questions.length * 3; 
-                // 計算得分百分比 (0.0 ~ 1.0)
-                const scoreRatio = totalScore / maxScore; 
-
-                let result = {};
-                // 用百分比來分級，不管你有 10 題還是 50 題都通用！
-                if (scoreRatio <= 0.3) {
-                    // 得分率 30% 以下 (原先的 8分以下)
-                    result = { status: "STATUS: STABLE", desc: "你的思緒依然清晰。這是一份健康且理性的欣賞，請將這份美好妥善收藏。", color: "#a8d8ea", bgmId: "bgm-res-stable", bgmVolume: 1.0 };
-                } else if (scoreRatio <= 0.6) {
-                    // 得分率 30% ~ 60% (原先的 18分以下)
-                    result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9", bgmId: "bgm-res-nostalgic", bgmVolume: 0.5 };
-                } else {
-                    // 得分率 60% 以上
-                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d", bgmId: "bgm-res-lost", bgmVolume: 0.5 };
-                }
-
-                const title = document.getElementById('result-title');
-                title.innerText = result.status;
-                title.style.color = result.color;
-                
-                // 動態顯示分數： 你的得分 / 自動計算的滿分
-                document.getElementById('result-score').innerHTML = `${totalScore} <span style="font-size: 1.2rem; color: #aaa;">/ ${maxScore}</span>`;
-                document.getElementById('result-desc').innerText = result.desc;
-                
-                switchBgm(document.getElementById(result.bgmId), result.bgmVolume);
-
-            }, 100); 
-
-            setTimeout(() => {
-                flashOverlay.classList.remove('flash-anim');
-                vcrStatus.innerText = "ANALYZING_MIND...";
-                vcrStatus.style.color = "white";
-            }, 800);
-
-        }, 2500);
-    }
-
     // 📸 產生圖片並分享的核心功能
     async function shareAsImage() {
         playClickSound();
