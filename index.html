@@ -161,7 +161,17 @@
         .share-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
         .btn-share { flex: 1; padding: 10px; font-size: 1.2rem; border: 1px solid var(--vhs-gray); background: transparent; color: #FFF; font-family: 'VT323', 'Noto Sans TC'; cursor: pointer; transition: 0.3s;}
         .btn-share.threads { border-color: #e0a96d; color: #e0a96d; }
-        .btn-share:hover { background: rgba(255,255,255,0.1); }
+        /* 🖱️ 只有具備「滑鼠」的裝置才啟用 Hover，避免手機卡住雙擊 */
+        @media (hover: hover) {
+            .option-btn:hover { border-color: #FFF; color: #FFF; padding-left: 25px; background: rgba(255,255,255,0.05); }
+            .btn-action:hover { background: #FFF; color: #000; }
+            .btn-share:hover { background: rgba(255,255,255,0.1); } /* 👈 把分享按鈕也加進來保護 */
+        }
+
+        /* 📱 針對「手機觸控」：按下的瞬間發光，放開就恢復 */
+        .option-btn:active { border-color: #FFF; color: #FFF; padding-left: 25px; background: rgba(255,255,255,0.05); transition: 0s; }
+        .btn-action:active { background: #FFF; color: #000; transition: 0s; }
+        .btn-share:active { background: rgba(255,255,255,0.1); transition: 0s; } /* 👈 手機專用點擊特效 */
 
         /* 背景音樂按鈕固定在左下角 */
         #music-control {
@@ -600,17 +610,22 @@
         const btn = document.getElementById('btn-share-img');
         const originalText = btn.innerText;
         
-        // 顯示載入中動畫，讓玩家知道正在算圖
+        // 顯示載入中動畫，讓玩家知道已經點到了
         btn.innerText = "[ 處理影像中... PROCESSING ]";
         btn.style.pointerEvents = "none";
 
+        // 🌟 關鍵魔法：強迫程式暫停 0.1 秒，讓瀏覽器有時間把按鈕文字更新，再開始耗效能的算圖
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         try {
-            // 使用 html2canvas 將 #result-box 轉成圖片 (scale: 2 讓圖片變高畫質)
+            // 使用 html2canvas 將 #result-box 轉成圖片
             const canvas = await html2canvas(resultBox, {
                 backgroundColor: '#121212',
-                scale: 2,
+                scale: 3, 
                 useCORS: true
             });
+            
+            // ... (下方原本的程式碼都不用動) ...
             
             // 將畫布轉為圖片檔案 (Blob)
             canvas.toBlob(async (blob) => {
