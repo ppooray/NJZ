@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJDI - Archive 1998</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #121212;
@@ -136,7 +138,16 @@
             padding: 15px; font-size: 1.5rem; font-family: 'VT323', monospace; cursor: pointer;
             letter-spacing: 4px; transition: 0.3s;
         }
-        .btn-action:hover { background: #FFF; color: #000; }
+
+        /* 🖱️ 只有具備「滑鼠」的裝置（電腦）才啟用 Hover，避免手機卡住反白 */
+        @media (hover: hover) {
+            .option-btn:hover { border-color: #FFF; color: #FFF; padding-left: 25px; background: rgba(255,255,255,0.05); }
+            .btn-action:hover { background: #FFF; color: #000; }
+        }
+
+        /* 📱 針對「手機觸控」：只在手指按下的『瞬間』發光，放開就恢復 */
+        .option-btn:active { border-color: #FFF; color: #FFF; padding-left: 25px; background: rgba(255,255,255,0.05); transition: 0s; }
+        .btn-action:active { background: #FFF; color: #000; transition: 0s; }
 
         /* 等待動畫區塊 */
         #wait-view { display: none; text-align: center; }
@@ -272,10 +283,20 @@
         </div>
 
         <div id="result-view">
-            <div id="result-box">
+            <div id="result-box" style="background-color: #121212;">
                 <h2 id="result-title"></h2>
-                <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong> </p>
+                <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong></p>
+                
+                <!-- 📸 新增：隨機小卡照片區塊 (加上了一點復古濾鏡) -->
+                <img id="result-photo" src="" alt="ARCHIVE_PHOTO" style="width: 100%; max-width: 250px; border-radius: 4px; margin: 15px 0; border: 1px solid #444; filter: contrast(1.1) sepia(0.2) brightness(0.9); display: none;">
+
                 <p id="result-desc" style="font-weight: 300; margin-top: 20px; line-height: 1.8; color: #ddd; text-align: left;"></p>
+                
+                <!-- 圖片浮水印 -->
+                <div style="font-family: 'VT323', monospace; color: #555; margin-top: 30px; font-size: 1rem; border-top: 1px dashed #444; padding-top: 10px; text-align: center;">
+                    TAPE_01: NJDI_ARCHIVE<br>
+                    https://njditest.vercel.app/
+                </div>
             </div>
             
             <div class="share-group">
@@ -475,6 +496,39 @@
         const transitionScreen = document.getElementById('transition-screen');
         const staticAudio = document.getElementById('static-sound');
         const vcrStatus = document.getElementById('vcr-status');
+        const title = document.getElementById('result-title');
+        title.innerText = result.status;
+        title.style.color = result.color;
+                
+        document.getElementById('result-score').innerHTML = `${totalScore} <span style="font-size: 1.2rem; color: #aaa;">/ ${maxScore}</span>`;
+        document.getElementById('result-desc').innerText = result.desc;
+
+        // 🐰 新增：隨機抽取寫真小卡照片
+        // 🐰 SSR 機率抽卡系統：抽取寫真小卡照片
+                let finalPhotoSrc = "";
+                const gachaRoll = Math.random() * 100; // 系統骰出 0 ~ 100 的隨機數字
+
+                // 🎲 設定機率 (例如：5% 機率中隱藏版，95% 機率中普通版)
+                if (gachaRoll <= 5) {
+                    
+                    // ✨ 5% 歐洲人專屬：抽中隱藏版 (SSR)
+                    finalPhotoSrc = "photos/ssr.jpg"; 
+                    
+                } else {
+                    
+                    // 📦 95% 普通版：從資料夾的數字照片中隨機抽一張
+                    const totalNormalPhotos = 5; // 👈 ⚠️ 你的普通照片有幾張，這裡就填多少！(例如 1~50 就填 50)
+                    
+                    // 自動產生 1 到 totalNormalPhotos 之間的隨機整數
+                    const randomNum = Math.floor(Math.random() * totalNormalPhotos) + 1; 
+                    finalPhotoSrc = `photos/${randomNum}.jpg`; 
+                    
+                }
+
+                // 將抽到的照片顯示在畫面上
+                const photoEl = document.getElementById('result-photo');
+                photoEl.src = finalPhotoSrc;
+                photoEl.style.display = 'inline-block';
         
         transitionScreen.style.display = 'flex';
         staticAudio.play().catch(e => console.log('Audio blocked'));
@@ -531,33 +585,63 @@
         }, 2500);
     }
 
-    function getShareText() {
-        const title = document.getElementById('result-title').innerText;
-        const score = totalScore; 
-        const maxScore = questions.length * 3; // 自動抓滿分
-        return `我在「NJDI 鯨鬱症自我檢測」獲得了 ${title} \n分數: ${score}/${maxScore}\n\n📼 立即測驗你的鯨鬱指數：\nhttps://njditest.vercel.app/`;
-    }
-
-    function shareToThreads() {
+    // 📸 產生圖片並分享的核心功能
+    async function shareAsImage() {
         playClickSound();
-        const text = encodeURIComponent(getShareText());
-        window.open(`https://threads.net/intent/post?text=${text}`, '_blank');
-    }
-
-    function shareResult() {
-        playClickSound();
-        const text = getShareText();
+        const resultBox = document.getElementById('result-box');
+        const btn = document.getElementById('btn-share-img');
+        const originalText = btn.innerText;
         
-        if (navigator.share) {
-            navigator.share({
-                title: 'NJDI 鯨鬱症測驗',
-                text: text,
-                url: 'https://njditest.vercel.app/'
-            }).catch(console.error);
-        } else {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("✨ 測驗結果已複製到剪貼簿！可以貼到 IG 限動或傳給朋友囉！");
+        // 顯示載入中動畫，讓玩家知道正在算圖
+        btn.innerText = "[ 處理影像中... PROCESSING ]";
+        btn.style.pointerEvents = "none";
+
+        try {
+            // 使用 html2canvas 將 #result-box 轉成圖片 (scale: 2 讓圖片變高畫質)
+            const canvas = await html2canvas(resultBox, {
+                backgroundColor: '#121212',
+                scale: 2,
+                useCORS: true
             });
+            
+            // 將畫布轉為圖片檔案 (Blob)
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], "NJDI_Result.png", { type: "image/png" });
+                const shareText = `我在「NJDI 鯨鬱症自我檢測」獲得了 ${document.getElementById('result-title').innerText}！\n\n📼 立即測驗：https://njditest.vercel.app/`;
+
+                // 判斷手機是否支援原生的「圖片分享功能」
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            title: 'NJDI 鯨鬱症測驗',
+                            text: shareText,
+                            files: [file]
+                        });
+                    } catch (error) {
+                        console.log('玩家取消了分享', error);
+                    }
+                } else {
+                    // 電腦版或不支援的手機：自動下載圖片並複製文字
+                    const link = document.createElement('a');
+                    link.download = 'NJDI_Result.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        alert("✨ 結果圖已下載！並且文案已複製到剪貼簿，可以直接去發 IG 或 Threads 囉！");
+                    });
+                }
+                
+                // 恢復按鈕原本的樣子
+                btn.innerText = originalText;
+                btn.style.pointerEvents = "auto";
+            }, 'image/png');
+
+        } catch (err) {
+            console.error(err);
+            alert("⚠️ 影像處理失敗，請重試！");
+            btn.innerText = originalText;
+            btn.style.pointerEvents = "auto";
         }
     }
 </script>
