@@ -496,39 +496,6 @@
         const transitionScreen = document.getElementById('transition-screen');
         const staticAudio = document.getElementById('static-sound');
         const vcrStatus = document.getElementById('vcr-status');
-        const title = document.getElementById('result-title');
-        title.innerText = result.status;
-        title.style.color = result.color;
-                
-        document.getElementById('result-score').innerHTML = `${totalScore} <span style="font-size: 1.2rem; color: #aaa;">/ ${maxScore}</span>`;
-        document.getElementById('result-desc').innerText = result.desc;
-
-        // 🐰 新增：隨機抽取寫真小卡照片
-        // 🐰 SSR 機率抽卡系統：抽取寫真小卡照片
-                let finalPhotoSrc = "";
-                const gachaRoll = Math.random() * 100; // 系統骰出 0 ~ 100 的隨機數字
-
-                // 🎲 設定機率 (例如：5% 機率中隱藏版，95% 機率中普通版)
-                if (gachaRoll <= 5) {
-                    
-                    // ✨ 5% 歐洲人專屬：抽中隱藏版 (SSR)
-                    finalPhotoSrc = "photos/ssr.jpg"; 
-                    
-                } else {
-                    
-                    // 📦 95% 普通版：從資料夾的數字照片中隨機抽一張
-                    const totalNormalPhotos = 5; // 👈 ⚠️ 你的普通照片有幾張，這裡就填多少！(例如 1~50 就填 50)
-                    
-                    // 自動產生 1 到 totalNormalPhotos 之間的隨機整數
-                    const randomNum = Math.floor(Math.random() * totalNormalPhotos) + 1; 
-                    finalPhotoSrc = `photos/${randomNum}.jpg`; 
-                    
-                }
-
-                // 將抽到的照片顯示在畫面上
-                const photoEl = document.getElementById('result-photo');
-                photoEl.src = finalPhotoSrc;
-                photoEl.style.display = 'inline-block';
         
         transitionScreen.style.display = 'flex';
         staticAudio.play().catch(e => console.log('Audio blocked'));
@@ -537,6 +504,69 @@
             vcrStatus.innerText = "ERROR: SYSTEM_OVERLOAD";
             vcrStatus.style.color = "red";
         }, 1000);
+
+        setTimeout(() => {
+            flashOverlay.classList.add('flash-anim');
+            
+            setTimeout(() => {
+                transitionScreen.style.display = 'none';
+                staticAudio.pause(); staticAudio.currentTime = 0;
+                resultView.style.display = 'block'; 
+                
+                // 1️⃣ 計算分數比例
+                const maxScore = questions.length * 3; 
+                const scoreRatio = totalScore / maxScore; 
+
+                // 2️⃣ 宣告 result (就是這裡之前不小心不見了！)
+                let result = {};
+                
+                if (scoreRatio <= 0.3) {
+                    result = { status: "STATUS: STABLE", desc: "你的思緒依然清晰。這是一份健康且理性的欣賞，請將這份美好妥善收藏。", color: "#a8d8ea", bgmId: "bgm-res-stable", bgmVolume: 1.0 };
+                } else if (scoreRatio <= 0.6) {
+                    result = { status: "STATUS: NOSTALGIC", desc: "你已經染上了淡淡的鯨鬱症。建議在冬日的午後，戴上耳機播放《Ditto》，讓這份思念安靜地釋放。", color: "#f3e1a9", bgmId: "bgm-res-nostalgic", bgmVolume: 0.5 };
+                } else {
+                    result = { status: "STATUS: LOST_IN_WINTER", desc: "重度鯨鬱症。你的靈魂似乎已經迷失在有她們的那個時空。既然回不去了，就繼續作為第六人，永遠守護這段記憶吧。", color: "#e0a96d", bgmId: "bgm-res-lost", bgmVolume: 0.3 };
+                }
+
+                // 3️⃣ 顯示文字與分數
+                const title = document.getElementById('result-title');
+                title.innerText = result.status;
+                title.style.color = result.color;
+                
+                document.getElementById('result-score').innerHTML = `${totalScore} <span style="font-size: 1.2rem; color: #aaa;">/ ${maxScore}</span>`;
+                document.getElementById('result-desc').innerText = result.desc;
+
+                // 4️⃣ 🐰 SSR 機率抽卡系統：抽取寫真小卡照片
+                let finalPhotoSrc = "";
+                const gachaRoll = Math.random() * 100; // 骰出 0 ~ 100 的隨機數字
+
+                if (gachaRoll <= 5) {
+                    // ✨ 5% 歐洲人專屬：抽中隱藏版 (SSR)
+                    finalPhotoSrc = "photos/ssr.jpg"; 
+                } else {
+                    // 📦 95% 普通版：從資料夾的數字照片中隨機抽一張
+                    const totalNormalPhotos = 50; // 👈 ⚠️ 記得把這裡的 50 改成你實際的普通照片總數！
+                    const randomNum = Math.floor(Math.random() * totalNormalPhotos) + 1; 
+                    finalPhotoSrc = `photos/${randomNum}.jpg`; 
+                }
+
+                const photoEl = document.getElementById('result-photo');
+                photoEl.src = finalPhotoSrc;
+                photoEl.style.display = 'inline-block'; 
+                
+                // 5️⃣ 播放對應的結果音樂
+                switchBgm(document.getElementById(result.bgmId), result.bgmVolume);
+
+            }, 100); 
+
+            setTimeout(() => {
+                flashOverlay.classList.remove('flash-anim');
+                vcrStatus.innerText = "ANALYZING_MIND...";
+                vcrStatus.style.color = "white";
+            }, 800);
+
+        }, 2500);
+    }
 
         setTimeout(() => {
             flashOverlay.classList.add('flash-anim');
