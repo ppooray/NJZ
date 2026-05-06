@@ -536,23 +536,47 @@
                 document.getElementById('result-score').innerHTML = `${totalScore} <span style="font-size: 1.2rem; color: #aaa;">/ ${maxScore}</span>`;
                 document.getElementById('result-desc').innerText = result.desc;
 
-                // 4️⃣ 🐰 SSR 機率抽卡系統：抽取寫真小卡照片
+                // 4️⃣ 🐰 旗艦抽卡系統：多張 SSR ＋ 階級限定機率
                 let finalPhotoSrc = "";
-                const gachaRoll = Math.random() * 100; // 骰出 0 ~ 100 的隨機數字
+                const gachaRoll = Math.random() * 100; // 系統骰出 0 ~ 100 的隨機數字
 
-                if (gachaRoll <= 5) {
-                    // ✨ 5% 歐洲人專屬：抽中隱藏版 (SSR)
-                    finalPhotoSrc = "photos/ssr.jpg"; 
+                // 🌟 判斷條件：必須是中度以上 (scoreRatio > 0.3) 且 骰中 5% 機率
+                if (scoreRatio > 0.3 && gachaRoll <= 5) {
+                    
+                    // ✨ 歐洲人專屬：進入 SSR 資料夾隨機抽一張
+                    const totalSsrPhotos = 3; // 👈 ⚠️ 你的 ssr 資料夾裡有幾張隱藏版，這裡就填多少！
+                    const randomNum = Math.floor(Math.random() * totalSsrPhotos) + 1; 
+                    finalPhotoSrc = `photos/ssr/${randomNum}.jpg`; 
+                    
                 } else {
-                    // 📦 95% 普通版：從資料夾的數字照片中隨機抽一張
-                    const totalNormalPhotos = 50; // 👈 ⚠️ 記得把這裡的 50 改成你實際的普通照片總數！
-                    const randomNum = Math.floor(Math.random() * totalNormalPhotos) + 1; 
-                    finalPhotoSrc = `photos/${randomNum}.jpg`; 
+                    
+                    // 📦 普通版：根據症狀等級，進入不同資料夾抽卡
+                    let folderName = "";
+                    let photoCount = 0;
+
+                    if (scoreRatio <= 0.3) {
+                        // 🟢 輕度 (STABLE) - 狀態穩定 (沒有抽 SSR 的資格)
+                        folderName = "stable";
+                        photoCount = 10; // 👈 stable 資料夾裡的照片數量
+                    } else if (scoreRatio <= 0.6) {
+                        // 🟡 中度 (NOSTALGIC) - 淡淡懷舊
+                        folderName = "nostalgic";
+                        photoCount = 15; // 👈 nostalgic 資料夾裡的照片數量
+                    } else {
+                        // 🔴 重度 (LOST_IN_WINTER) - 迷失在冬天
+                        folderName = "lost";
+                        photoCount = 20; // 👈 lost 資料夾裡的照片數量
+                    }
+
+                    // 系統根據剛剛決定的資料夾與總數，自動抽一張
+                    const randomNum = Math.floor(Math.random() * photoCount) + 1; 
+                    finalPhotoSrc = `photos/${folderName}/${randomNum}.jpg`; 
                 }
 
+                // 將抽到的照片顯示在畫面上
                 const photoEl = document.getElementById('result-photo');
                 photoEl.src = finalPhotoSrc;
-                photoEl.style.display = 'inline-block'; 
+                photoEl.style.display = 'inline-block';
                 
                 // 5️⃣ 播放對應的結果音樂
                 switchBgm(document.getElementById(result.bgmId), result.bgmVolume);
