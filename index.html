@@ -283,12 +283,13 @@
         </div>
 
         <div id="result-view">
+            <!-- 這個 result-box 是截圖的範圍 -->
             <div id="result-box" style="background-color: #121212;">
                 <h2 id="result-title"></h2>
                 <p style="font-size: 1.2rem; font-family: 'VT323', monospace; color: #aaa;">SCORE: <strong id="result-score" style="font-size: 1.8rem; color: #FFF;"></strong></p>
                 
-                <!-- 📸 新增：隨機小卡照片區塊 (加上了一點復古濾鏡) -->
-                <img id="result-photo" src="" alt="ARCHIVE_PHOTO" style="width: 100%; max-width: 250px; border-radius: 4px; margin: 15px 0; border: 1px solid #444; filter: contrast(1.1) sepia(0.2) brightness(0.9); display: none;">
+                <!-- 隨機寫真小卡 -->
+                <img id="result-photo" src="" alt="ARCHIVE_PHOTO" style="width: 100%; max-width: 250px; border-radius: 4px; margin: 15px 0; border: 1px solid #444; display: none;">
 
                 <p id="result-desc" style="font-weight: 300; margin-top: 20px; line-height: 1.8; color: #ddd; text-align: left;"></p>
                 
@@ -299,9 +300,9 @@
                 </div>
             </div>
             
+            <!-- 📸 兇手在這裡！換成這顆全新的截圖分享按鈕！ -->
             <div class="share-group">
-                <button onclick="shareToThreads()" class="btn-share threads">@ Threads</button>
-                <button onclick="shareResult()" class="btn-share">↗ Share IG/Link</button>
+                <button id="btn-share-img" onclick="shareAsImage()" class="btn-share threads">📸 儲存 / 分享測驗結果</button>
             </div>
             <button type="button" class="btn-action" onclick="location.reload()" style="margin-top: 15px;">↺ REWIND TAPE</button>
         </div>
